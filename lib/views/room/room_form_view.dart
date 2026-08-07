@@ -1,138 +1,115 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kosmo/theme/kosmo_theme.dart';
+import 'package:kosmo/components/kosmo_app_bar.dart';
+import 'package:kosmo/components/kosmo_text_field.dart';
+import 'package:kosmo/components/kosmo_button.dart';
 
-class RoomFormView extends StatelessWidget {
+class RoomFormView extends StatefulWidget {
   const RoomFormView({super.key});
+
+  @override
+  State<RoomFormView> createState() => _RoomFormViewState();
+}
+
+class _RoomFormViewState extends State<RoomFormView> {
+  final _formKey = GlobalKey<FormState>();
+  final _roomNumberController = TextEditingController();
+  final _floorController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _facilitiesController = TextEditingController();
+  String _selectedStatus = 'Tersedia';
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Data kamar berhasil disimpan.')),
+    );
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF111827)),
-        title: Text(
-          'Tambah / Edit Kamar',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF111827),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      backgroundColor: KosmoTheme.background,
+      appBar: const KosmoAppBar(title: 'Formulir Kamar'),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTextField('Nomor Kamar'),
-            const SizedBox(height: 16),
-            _buildTextField('Lantai', keyboardType: TextInputType.number),
-            const SizedBox(height: 16),
-            _buildTextField('Harga', keyboardType: TextInputType.number),
-            const SizedBox(height: 16),
-            _buildDropdown('Status', ['Tersedia', 'Terisi', 'Maintenance']),
-            const SizedBox(height: 16),
-            _buildTextField('Fasilitas', maxLines: 3),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              KosmoTextField(
+                controller: _roomNumberController,
+                label: 'Nomor Kamar (Contoh: 101)',
+                prefixIcon: Icons.meeting_room_rounded,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Nomor kamar wajib diisi';
+                  return null;
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF047857),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  'Simpan',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              KosmoTextField(
+                controller: _floorController,
+                label: 'Posisi Lantai (Contoh: 1)',
+                prefixIcon: Icons.layers_outlined,
+                keyboardType: TextInputType.number,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Posisi lantai wajib diisi';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              KosmoTextField(
+                controller: _priceController,
+                label: 'Harga Sewa per Bulan (Rp)',
+                prefixIcon: Icons.payments_outlined,
+                keyboardType: TextInputType.number,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Harga sewa wajib diisi';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedStatus,
+                decoration: InputDecoration(
+                  labelText: 'Status Kamar',
+                  prefixIcon: const Icon(Icons.info_outline_rounded),
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Tersedia', child: Text('Tersedia', style: TextStyle(fontFamily: 'Poppins'))),
+                  DropdownMenuItem(value: 'Terisi', child: Text('Terisi', style: TextStyle(fontFamily: 'Poppins'))),
+                  DropdownMenuItem(value: 'Maintenance', child: Text('Maintenance', style: TextStyle(fontFamily: 'Poppins'))),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedStatus = value;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              KosmoTextField(
+                controller: _facilitiesController,
+                label: 'Fasilitas Kamar (AC, Kasur, WiFi, dll)',
+                prefixIcon: Icons.king_bed_outlined,
+                maxLines: 3,
+              ),
+              const SizedBox(height: 32),
+              KosmoButton(
+                label: 'Simpan Data Kamar',
+                onPressed: _save,
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField(String label, {int maxLines = 1, TextInputType? keyboardType}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF374151),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          style: GoogleFonts.poppins(),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF047857)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDropdown(String label, List<String> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF374151),
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-          ),
-          initialValue: items[0],
-          items: items.map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value, style: GoogleFonts.poppins()),
-            );
-          }).toList(),
-          onChanged: (_) {},
-        ),
-      ],
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/components/kosmo_app_bar.dart';
 import 'package:kosmo/components/kosmo_bottom_nav.dart';
+import 'package:kosmo/components/kosmo_text_field.dart';
 import 'package:kosmo/services/whatsapp_service.dart';
 
 class PaymentListView extends StatefulWidget {
@@ -13,8 +14,9 @@ class PaymentListView extends StatefulWidget {
 }
 
 class _PaymentListViewState extends State<PaymentListView> {
-  String _selectedFilter = 'All';
-  final List<String> _filters = ['All', 'Paid', 'Pending', 'Overdue'];
+  String _selectedFilter = 'Semua';
+  final List<String> _filters = ['Semua', 'Lunas', 'Pending', 'Nunggak'];
+  final _searchController = TextEditingController();
 
   void _onNavTap(int index) {
     if (index == 0) {
@@ -26,6 +28,10 @@ class _PaymentListViewState extends State<PaymentListView> {
     }
   }
 
+  Future<void> _refreshData() async {
+    await Future.delayed(const Duration(milliseconds: 600));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,9 +39,17 @@ class _PaymentListViewState extends State<PaymentListView> {
       backgroundColor: KosmoTheme.background,
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: KosmoTextField(
+              controller: _searchController,
+              label: 'Cari Riwayat Pembayaran...',
+              prefixIcon: Icons.search_rounded,
+            ),
+          ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
             child: Row(
               children: _filters.map((filter) {
                 final isSelected = _selectedFilter == filter;
@@ -46,8 +60,8 @@ class _PaymentListViewState extends State<PaymentListView> {
                       filter,
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: isSelected ? Colors.white : KosmoTheme.primary,
+                        fontSize: 12,
+                        color: isSelected ? Colors.white : KosmoTheme.textPrimary,
                       ),
                     ),
                     selected: isSelected,
@@ -56,12 +70,12 @@ class _PaymentListViewState extends State<PaymentListView> {
                         _selectedFilter = filter;
                       });
                     },
-                    backgroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).cardColor,
                     selectedColor: KosmoTheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: KosmoTheme.primary.withValues(alpha: 0.5),
+                        color: isSelected ? KosmoTheme.primary : Colors.grey.withValues(alpha: 0.3),
                       ),
                     ),
                   ),
@@ -70,12 +84,16 @@ class _PaymentListViewState extends State<PaymentListView> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return _buildPaymentCard();
-              },
+            child: RefreshIndicator(
+              onRefresh: _refreshData,
+              color: KosmoTheme.primary,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return _buildPaymentCard(index);
+                },
+              ),
             ),
           ),
         ],
@@ -92,7 +110,7 @@ class _PaymentListViewState extends State<PaymentListView> {
     );
   }
 
-  Widget _buildPaymentCard() {
+  Widget _buildPaymentCard(int index) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -105,9 +123,9 @@ class _PaymentListViewState extends State<PaymentListView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Budi Santoso - Kamar A101',
-                  style: TextStyle(
+                Text(
+                  'Penghuni ${index + 1} - Kamar ${101 + index}',
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
@@ -116,16 +134,16 @@ class _PaymentListViewState extends State<PaymentListView> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: KosmoTheme.warning.withValues(alpha: 0.1),
+                    color: index % 2 == 0 ? KosmoTheme.primary.withValues(alpha: 0.1) : KosmoTheme.warning.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'Pending',
+                  child: Text(
+                    index % 2 == 0 ? 'Lunas' : 'Pending',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: KosmoTheme.warning,
+                      color: index % 2 == 0 ? KosmoTheme.primary : KosmoTheme.warning,
                     ),
                   ),
                 ),
@@ -142,9 +160,9 @@ class _PaymentListViewState extends State<PaymentListView> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Jatuh Tempo: 15 Agustus 2026',
-              style: TextStyle(
+            Text(
+              'Jatuh Tempo: ${15 + index} Agustus 2026',
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 12,
                 color: KosmoTheme.textSecondary,
@@ -156,13 +174,13 @@ class _PaymentListViewState extends State<PaymentListView> {
               children: [
                 TextButton.icon(
                   onPressed: () => WhatsappService.sendEmail(
-                    email: 'budi@example.com',
-                    tenantName: 'Budi Santoso',
+                    email: 'penghuni$index@example.com',
+                    tenantName: 'Penghuni ${index + 1}',
                     month: 'Agustus 2026',
                     amount: '1.500.000',
-                    ownerName: 'Owner',
+                    ownerName: 'Owner Kosmo',
                   ),
-                  icon: const Icon(Icons.email, size: 16),
+                  icon: const Icon(Icons.email_outlined, size: 16),
                   label: const Text('Email'),
                   style: TextButton.styleFrom(
                     foregroundColor: KosmoTheme.secondary,
@@ -171,12 +189,12 @@ class _PaymentListViewState extends State<PaymentListView> {
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () => WhatsappService.sendReminder(
-                    phone: '081234567890',
-                    tenantName: 'Budi Santoso',
+                    phone: '08123456789$index',
+                    tenantName: 'Penghuni ${index + 1}',
                     month: 'Agustus 2026',
                     amount: '1.500.000',
                   ),
-                  icon: const Icon(Icons.message, size: 16),
+                  icon: const Icon(Icons.message_outlined, size: 16),
                   label: const Text('WA'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: KosmoTheme.success,

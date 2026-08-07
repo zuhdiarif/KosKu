@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kosmo/theme/kosmo_theme.dart';
+import 'package:kosmo/utils/routes.dart';
 
 class RoomDetailView extends StatelessWidget {
   const RoomDetailView({super.key});
@@ -7,22 +8,13 @@ class RoomDetailView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: KosmoTheme.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF111827)),
-        title: Text(
-          'Detail Kamar 101',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF111827),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('Detail Kamar 101'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit, color: Color(0xFF047857)),
-            onPressed: () {},
+            icon: const Icon(Icons.edit_outlined, color: KosmoTheme.primary),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.roomForm),
           ),
         ],
       ),
@@ -31,29 +23,46 @@ class RoomDetailView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/images/room_interior.jpg',
+                width: double.infinity,
+                height: 180,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: 180,
+                  color: KosmoTheme.primary.withValues(alpha: 0.1),
+                  child: const Icon(Icons.meeting_room, size: 64, color: KosmoTheme.primary),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: const [
                       Text(
-                        'Harga',
-                        style: GoogleFonts.poppins(
-                          color: const Color(0xFF6B7280),
-                        ),
+                        'Harga Sewa',
+                        style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary),
                       ),
                       Text(
                         'Rp 1.500.000 / bulan',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
-                        ),
+                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ],
                   ),
@@ -61,24 +70,23 @@ class RoomDetailView extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Status',
-                        style: GoogleFonts.poppins(
-                          color: const Color(0xFF6B7280),
-                        ),
+                      const Text(
+                        'Status Kamar',
+                        style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFEE2E2),
+                          color: KosmoTheme.errorContainer,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Terisi',
-                          style: GoogleFonts.poppins(
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
                             fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFFDC2626),
+                            fontWeight: FontWeight.w600,
+                            color: KosmoTheme.error,
                           ),
                         ),
                       ),
@@ -87,19 +95,14 @@ class RoomDetailView extends StatelessWidget {
                   const Divider(height: 24),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                    children: const [
                       Text(
                         'Lantai',
-                        style: GoogleFonts.poppins(
-                          color: const Color(0xFF6B7280),
-                        ),
+                        style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary),
                       ),
                       Text(
-                        '1',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111827),
-                        ),
+                        'Lantai 1',
+                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -107,84 +110,83 @@ class RoomDetailView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              'Fasilitas',
-              style: GoogleFonts.poppins(
+            const Text(
+              'Fasilitas Kamar',
+              style: TextStyle(
+                fontFamily: 'Poppins',
                 fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF111827),
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'AC, Kasur Springbed, Lemari, Meja Belajar, Kamar Mandi Dalam, WiFi',
-                style: GoogleFonts.poppins(
-                  color: const Color(0xFF374151),
-                  height: 1.5,
-                ),
-              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildFacilityChip(Icons.ac_unit_rounded, 'AC'),
+                _buildFacilityChip(Icons.wifi_rounded, 'WiFi High-Speed'),
+                _buildFacilityChip(Icons.bed_rounded, 'Kasur Springbed'),
+                _buildFacilityChip(Icons.shower_rounded, 'Kamar Mandi Dalam'),
+                _buildFacilityChip(Icons.table_restaurant_rounded, 'Meja Belajar'),
+              ],
             ),
             const SizedBox(height: 24),
-            Text(
+            const Text(
               'Penghuni Saat Ini',
-              style: GoogleFonts.poppins(
+              style: TextStyle(
+                fontFamily: 'Poppins',
                 fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF111827),
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    backgroundColor: Color(0xFFE5E7EB),
-                    child: Icon(Icons.person, color: Color(0xFF9CA3AF)),
+                  CircleAvatar(
+                    backgroundColor: KosmoTheme.primary.withValues(alpha: 0.1),
+                    child: const Text(
+                      'A',
+                      style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: KosmoTheme.primary),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: const [
                         Text(
                           'Andi Wijaya',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF111827),
-                          ),
+                          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          'Sejak: 1 Jan 2024',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: const Color(0xFF6B7280),
-                          ),
+                          'Sejak: 1 Jan 2026 • 081234567891',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: KosmoTheme.textSecondary),
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.chevron_right, color: Color(0xFF9CA3AF)),
-                  ),
+                  const Icon(Icons.chevron_right, color: KosmoTheme.textSecondary),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFacilityChip(IconData icon, String label) {
+    return Chip(
+      avatar: Icon(icon, size: 16, color: KosmoTheme.primary),
+      label: Text(label, style: const TextStyle(fontFamily: 'Poppins', fontSize: 12)),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: Color(0xFFE1E3E4))),
     );
   }
 }

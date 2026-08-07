@@ -1,99 +1,117 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kosmo/theme/kosmo_theme.dart';
+import 'package:kosmo/components/kosmo_app_bar.dart';
+import 'package:kosmo/components/kosmo_text_field.dart';
+import 'package:kosmo/components/kosmo_button.dart';
 
-class KosFormView extends StatelessWidget {
+class KosFormView extends StatefulWidget {
   const KosFormView({super.key});
+
+  @override
+  State<KosFormView> createState() => _KosFormViewState();
+}
+
+class _KosFormViewState extends State<KosFormView> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _descController = TextEditingController();
+  final _roomsController = TextEditingController();
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Data kos berhasil disimpan.')),
+    );
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF111827)),
-        title: Text(
-          'Tambah / Edit Kos',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF111827),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      backgroundColor: KosmoTheme.background,
+      appBar: const KosmoAppBar(title: 'Formulir Kosmo'),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTextField('Nama Kos'),
-            const SizedBox(height: 16),
-            _buildTextField('Alamat', maxLines: 3),
-            const SizedBox(height: 16),
-            _buildTextField('Deskripsi', maxLines: 3),
-            const SizedBox(height: 16),
-            _buildTextField('Total Kamar', keyboardType: TextInputType.number),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF047857),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  'Simpan',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  height: 160,
+                  width: double.infinity,
+                  color: KosmoTheme.primary.withValues(alpha: 0.08),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.add_a_photo_outlined, size: 40, color: KosmoTheme.primary),
+                      SizedBox(height: 8),
+                      Text(
+                        'Upload Foto Kosmo',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: KosmoTheme.primary,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              KosmoTextField(
+                controller: _nameController,
+                label: 'Nama Kos',
+                prefixIcon: Icons.apartment_rounded,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Nama kos wajib diisi';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              KosmoTextField(
+                controller: _addressController,
+                label: 'Alamat Lengkap',
+                prefixIcon: Icons.location_on_outlined,
+                maxLines: 2,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Alamat wajib diisi';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              KosmoTextField(
+                controller: _descController,
+                label: 'Deskripsi & Fasilitas Umum',
+                prefixIcon: Icons.description_outlined,
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              KosmoTextField(
+                controller: _roomsController,
+                label: 'Total Kamar',
+                prefixIcon: Icons.meeting_room_outlined,
+                keyboardType: TextInputType.number,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Jumlah kamar wajib diisi';
+                  if (int.tryParse(val.trim()) == null) return 'Masukkan angka yang valid';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 32),
+              KosmoButton(
+                label: 'Simpan Data Kos',
+                onPressed: _save,
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField(String label, {int maxLines = 1, TextInputType? keyboardType}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: const Color(0xFF374151),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          style: GoogleFonts.poppins(),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF047857)),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

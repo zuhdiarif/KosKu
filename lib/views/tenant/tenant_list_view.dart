@@ -1,103 +1,148 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kosmo/theme/kosmo_theme.dart';
+import 'package:kosmo/utils/routes.dart';
+import 'package:kosmo/components/kosmo_app_bar.dart';
+import 'package:kosmo/components/kosmo_text_field.dart';
+import 'package:kosmo/services/whatsapp_service.dart';
 
-class TenantListView extends StatelessWidget {
+class TenantListView extends StatefulWidget {
   const TenantListView({super.key});
+
+  @override
+  State<TenantListView> createState() => _TenantListViewState();
+}
+
+class _TenantListViewState extends State<TenantListView> {
+  final _searchController = TextEditingController();
+
+  Future<void> _refreshData() async {
+    await Future.delayed(const Duration(milliseconds: 600));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Daftar Penghuni',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF111827),
-            fontWeight: FontWeight.w600,
+      backgroundColor: KosmoTheme.background,
+      appBar: const KosmoAppBar(title: 'Daftar Penghuni'),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: KosmoTextField(
+              controller: _searchController,
+              label: 'Cari Nama Penghuni / Nomor HP...',
+              prefixIcon: Icons.search_rounded,
+            ),
           ),
-        ),
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: 5,
-        itemBuilder: (context, index) {
-          return InkWell(
-            onTap: () {
-              Navigator.pushNamed(context, '/tenant-detail');
-            },
-            child: Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: const Color(0xFFE5E7EB),
-                      child: Text(
-                        'P${index + 1}',
-                        style: GoogleFonts.poppins(
-                          color: const Color(0xFF4B5563),
-                          fontWeight: FontWeight.w600,
-                        ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _refreshData,
+              color: KosmoTheme.primary,
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  final isArrears = index % 3 == 0;
+                  final tenantName = 'Penghuni ${index + 1}';
+                  final phone = '08123456789$index';
+
+                  return InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.tenantDetail);
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Penghuni ${index + 1}',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              color: const Color(0xFF111827),
-                        ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Kamar ${101 + index} • 08123456789$index',
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: const Color(0xFF6B7280),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 24,
+                              backgroundColor: KosmoTheme.primary.withValues(alpha: 0.1),
+                              child: Text(
+                                'P${index + 1}',
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  color: KosmoTheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: index % 3 == 0 ? const Color(0xFFFEE2E2) : const Color(0xFFD1FAE5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        index % 3 == 0 ? 'Nunggak' : 'Aktif',
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: index % 3 == 0 ? const Color(0xFFDC2626) : const Color(0xFF047857),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    tenantName,
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Kamar ${101 + index} • $phone',
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 12,
+                                      color: KosmoTheme.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: isArrears ? KosmoTheme.errorContainer : KosmoTheme.primary.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    isArrears ? 'Nunggak' : 'Aktif',
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: isArrears ? KosmoTheme.error : KosmoTheme.primary,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () => WhatsappService.sendReminder(
+                                    phone: phone,
+                                    tenantName: tenantName,
+                                    month: 'Agustus 2026',
+                                    amount: '1.500.000',
+                                  ),
+                                  icon: const Icon(Icons.message_rounded, color: KosmoTheme.success, size: 20),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/tenant-form');
+          Navigator.pushNamed(context, AppRoutes.tenantForm);
         },
-        backgroundColor: const Color(0xFF047857),
+        backgroundColor: KosmoTheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
