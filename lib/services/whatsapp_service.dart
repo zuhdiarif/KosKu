@@ -9,12 +9,15 @@ class WhatsappService {
     required String month,
     required String amount,
   }) async {
+    final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanPhone.isEmpty || cleanPhone.length < 8) return false;
+
     final message = AppConstants.waMessageTemplate
         .replaceAll('{name}', tenantName)
         .replaceAll('{month}', month)
         .replaceAll('{amount}', amount);
     final encodedMessage = Uri.encodeComponent(message);
-    final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+
     final String waPhone;
     if (cleanPhone.startsWith('62')) {
       waPhone = cleanPhone;
@@ -24,7 +27,11 @@ class WhatsappService {
       waPhone = '62$cleanPhone';
     }
     final uri = Uri.parse('https://wa.me/$waPhone?text=$encodedMessage');
-    return await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      return await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      return false;
+    }
   }
 
   static Future<bool> sendEmail({
@@ -34,6 +41,8 @@ class WhatsappService {
     required String amount,
     required String ownerName,
   }) async {
+    if (email.trim().isEmpty) return false;
+
     final subject = AppConstants.emailSubjectTemplate.replaceAll('{month}', month);
     final body = AppConstants.emailBodyTemplate
         .replaceAll('{name}', tenantName)
@@ -64,6 +73,10 @@ class WhatsappService {
       path: email,
       queryParameters: {'subject': subject, 'body': body},
     );
-    return await launchUrl(uri);
+    try {
+      return await launchUrl(uri);
+    } catch (_) {
+      return false;
+    }
   }
 }

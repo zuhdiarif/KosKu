@@ -14,6 +14,7 @@ class RoomProvider extends ChangeNotifier {
 
   Future<void> loadByKosId(String kosId) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _roomList = await _service.getByKosId(kosId);
@@ -26,36 +27,48 @@ class RoomProvider extends ChangeNotifier {
   }
 
   Future<bool> create(RoomModel room) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.create(room);
       await loadByKosId(room.kosId);
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> update(RoomModel room) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.update(room);
       await loadByKosId(room.kosId);
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> delete(String id, String kosId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.delete(id);
       await loadByKosId(kosId);
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }

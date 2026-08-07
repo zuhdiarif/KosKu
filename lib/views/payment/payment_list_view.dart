@@ -9,6 +9,7 @@ import 'package:kosmo/components/kosmo_empty_state.dart';
 import 'package:kosmo/components/kosmo_button.dart';
 import 'package:kosmo/services/whatsapp_service.dart';
 import 'package:kosmo/providers/payment_provider.dart';
+import 'package:kosmo/providers/tenant_provider.dart';
 import 'package:kosmo/models/payment_model.dart';
 import 'package:intl/intl.dart';
 
@@ -178,6 +179,11 @@ class _PaymentListViewState extends State<PaymentListView> {
     Color statusColor = isLunas ? KosmoTheme.primary : (isOverdue ? KosmoTheme.error : KosmoTheme.warning);
     String statusText = isLunas ? 'Lunas' : (isOverdue ? 'Nunggak' : 'Pending');
 
+    final tenantList = context.read<TenantProvider>().tenantList.where((t) => t.id == payment.tenantId).toList();
+    final tenantName = tenantList.isNotEmpty ? tenantList.first.name : payment.tenantId;
+    final tenantPhone = tenantList.isNotEmpty ? tenantList.first.phone : '';
+    final tenantEmail = tenantList.isNotEmpty ? (tenantList.first.email ?? '') : '';
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
@@ -193,7 +199,7 @@ class _PaymentListViewState extends State<PaymentListView> {
               children: [
                 Expanded(
                   child: Text(
-                    payment.notes?.isNotEmpty == true ? payment.notes! : 'Pembayaran',
+                    payment.notes?.isNotEmpty == true ? payment.notes! : 'Pembayaran $tenantName',
                     style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w600,
@@ -253,8 +259,8 @@ class _PaymentListViewState extends State<PaymentListView> {
                 ),
                 TextButton.icon(
                   onPressed: () => WhatsappService.sendEmail(
-                    email: 'penghuni@example.com', // dummy fallback if user email not available
-                    tenantName: payment.tenantId,
+                    email: tenantEmail,
+                    tenantName: tenantName,
                     month: DateFormat('MMMM yyyy').format(payment.dueDate),
                     amount: formatCurrency.format(payment.amount),
                     ownerName: 'Owner Kosmo',
@@ -268,8 +274,8 @@ class _PaymentListViewState extends State<PaymentListView> {
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () => WhatsappService.sendReminder(
-                    phone: '08123456789', // dummy fallback
-                    tenantName: payment.tenantId,
+                    phone: tenantPhone,
+                    tenantName: tenantName,
                     month: DateFormat('MMMM yyyy').format(payment.dueDate),
                     amount: formatCurrency.format(payment.amount),
                   ),

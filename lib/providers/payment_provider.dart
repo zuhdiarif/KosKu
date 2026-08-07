@@ -16,6 +16,7 @@ class PaymentProvider extends ChangeNotifier {
 
   Future<void> loadAll() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _paymentList = await _service.getAll();
@@ -29,6 +30,7 @@ class PaymentProvider extends ChangeNotifier {
 
   Future<void> loadByTenantId(String tenantId) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _paymentList = await _service.getByTenantId(tenantId);
@@ -42,6 +44,7 @@ class PaymentProvider extends ChangeNotifier {
 
   Future<void> loadOverdue() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _overdueList = await _service.getOverdue();
@@ -54,36 +57,48 @@ class PaymentProvider extends ChangeNotifier {
   }
 
   Future<bool> create(PaymentModel payment) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.create(payment);
       await loadAll();
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> update(PaymentModel payment) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.update(payment);
       await loadAll();
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> delete(String id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.delete(id);
       await loadAll();
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }

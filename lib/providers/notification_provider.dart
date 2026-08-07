@@ -14,6 +14,7 @@ class NotificationProvider extends ChangeNotifier {
 
   Future<void> loadByOwnerId(String ownerId) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _notificationList = await _service.getByOwnerId(ownerId);
@@ -26,24 +27,32 @@ class NotificationProvider extends ChangeNotifier {
   }
 
   Future<bool> create(NotificationModel notification) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.create(notification);
       await loadByOwnerId(notification.ownerId);
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> markAsSent(String id, String ownerId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.markAsSent(id);
       await loadByOwnerId(ownerId);
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }

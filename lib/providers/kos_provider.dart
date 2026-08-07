@@ -14,6 +14,7 @@ class KosProvider extends ChangeNotifier {
 
   Future<void> loadAll() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _kosList = await _service.getAll();
@@ -26,36 +27,48 @@ class KosProvider extends ChangeNotifier {
   }
 
   Future<bool> create(KosModel kos) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.create(kos);
       await loadAll();
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> update(KosModel kos) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.update(kos);
       await loadAll();
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> delete(String id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.delete(id);
       await loadAll();
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }

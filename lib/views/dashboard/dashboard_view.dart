@@ -7,6 +7,7 @@ import 'package:kosmo/components/connectivity_banner.dart';
 import 'package:kosmo/providers/auth_provider.dart';
 import 'package:kosmo/providers/payment_provider.dart';
 import 'package:kosmo/providers/kos_provider.dart';
+import 'package:kosmo/providers/tenant_provider.dart';
 import 'package:kosmo/services/whatsapp_service.dart';
 import 'package:intl/intl.dart';
 
@@ -43,6 +44,7 @@ class _DashboardViewState extends State<DashboardView> {
     final user = context.watch<AuthProvider>().user;
     final paymentProvider = context.watch<PaymentProvider>();
     final kosProvider = context.watch<KosProvider>();
+    final tenantProvider = context.watch<TenantProvider>();
 
     double totalRevenue = paymentProvider.paymentList
         .where((e) => e.status == 'paid')
@@ -281,14 +283,19 @@ class _DashboardViewState extends State<DashboardView> {
                   else
                     ...paymentProvider.overdueList.map((payment) {
                       final days = DateTime.now().difference(payment.dueDate).inDays;
+                      final tenantList = tenantProvider.tenantList.where((t) => t.id == payment.tenantId).toList();
+                      final tenantName = tenantList.isNotEmpty ? tenantList.first.name : payment.tenantId;
+                      final tenantPhone = tenantList.isNotEmpty ? tenantList.first.phone : '';
+                      final tenantEmail = tenantList.isNotEmpty ? (tenantList.first.email ?? '') : '';
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: _buildOverdueCard(
-                          payment.tenantId, 
-                          payment.roomId, 
+                          tenantName, 
+                          'Kamar ${payment.roomId}', 
                           days > 0 ? days : 0, 
-                          '08123456789', // Dummy phone 
-                          'tenant@example.com',
+                          tenantPhone, 
+                          tenantEmail,
                           formatCurrency.format(payment.amount),
                         ),
                       );

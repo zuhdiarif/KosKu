@@ -14,6 +14,7 @@ class TenantProvider extends ChangeNotifier {
 
   Future<void> loadByKosId(String kosId) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
       _tenantList = await _service.getByKosId(kosId);
@@ -26,36 +27,48 @@ class TenantProvider extends ChangeNotifier {
   }
 
   Future<bool> create(TenantModel tenant) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.create(tenant);
       await loadByKosId(tenant.kosId);
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> update(TenantModel tenant) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.update(tenant);
       await loadByKosId(tenant.kosId);
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }
   }
 
   Future<bool> delete(String id, String kosId) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
     try {
       await _service.delete(id);
       await loadByKosId(kosId);
       return true;
     } catch (e) {
       _error = e.toString();
+      _isLoading = false;
       notifyListeners();
       return false;
     }

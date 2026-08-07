@@ -10,7 +10,6 @@ class PaymentDetailView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const KosmoAppBar(title: 'Detail Pembayaran'),
-      backgroundColor: KosmoTheme.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -19,7 +18,7 @@ class PaymentDetailView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(

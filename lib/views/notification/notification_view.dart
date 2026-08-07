@@ -79,10 +79,18 @@ class _NotificationViewState extends State<NotificationView> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: provider.notificationList.length,
-      itemBuilder: (context, index) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        final user = context.read<AuthProvider>().user;
+        if (user != null) {
+          await context.read<NotificationProvider>().loadByOwnerId(user.id);
+        }
+      },
+      color: KosmoTheme.primary,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: provider.notificationList.length,
+        itemBuilder: (context, index) {
         final notification = provider.notificationList[index];
         final isWa = notification.sentVia == 'whatsapp';
 
@@ -170,8 +178,9 @@ class _NotificationViewState extends State<NotificationView> {
           ),
         );
       },
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTemplatesTab(BuildContext context) {
     return SingleChildScrollView(

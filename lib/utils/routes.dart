@@ -51,40 +51,49 @@ class AppRoutes {
       case forgotPassword:
         return MaterialPageRoute(builder: (_) => const ForgotPasswordView());
       case verifyOtp:
-        final email = settings.arguments as String;
+        final email = (settings.arguments as String?) ?? '';
         return MaterialPageRoute(builder: (_) => VerifyOtpView(email: email));
       case dashboard:
         return MaterialPageRoute(builder: (_) => const DashboardView());
       case kosList:
         return MaterialPageRoute(builder: (_) => const KosListView());
       case kosDetail:
-        final kos = settings.arguments as KosModel;
-        return MaterialPageRoute(builder: (_) => KosDetailView(kos: kos));
+        if (settings.arguments is KosModel) {
+          final kos = settings.arguments as KosModel;
+          return MaterialPageRoute(builder: (_) => KosDetailView(kos: kos));
+        }
+        return MaterialPageRoute(builder: (_) => const KosListView());
       case kosForm:
         final kos = settings.arguments as KosModel?;
         return MaterialPageRoute(builder: (_) => KosFormView(kos: kos));
       case roomList:
-        final kosId = settings.arguments as String;
+        final kosId = (settings.arguments as String?) ?? '';
         return MaterialPageRoute(builder: (_) => RoomListView(kosId: kosId));
       case roomDetail:
-        final room = settings.arguments as RoomModel;
-        return MaterialPageRoute(builder: (_) => RoomDetailView(room: room));
+        if (settings.arguments is RoomModel) {
+          final room = settings.arguments as RoomModel;
+          return MaterialPageRoute(builder: (_) => RoomDetailView(room: room));
+        }
+        return MaterialPageRoute(builder: (_) => const KosListView());
       case roomForm:
-        final args = settings.arguments as Map<String, dynamic>;
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(builder: (_) => RoomFormView(
-          kosId: args['kosId'] as String,
+          kosId: args['kosId'] as String? ?? '',
           room: args['room'] as RoomModel?,
         ));
       case tenantList:
-        final kosId = settings.arguments as String;
+        final kosId = (settings.arguments as String?) ?? '';
         return MaterialPageRoute(builder: (_) => TenantListView(kosId: kosId));
       case tenantDetail:
-        final tenant = settings.arguments as TenantModel;
-        return MaterialPageRoute(builder: (_) => TenantDetailView(tenant: tenant));
+        if (settings.arguments is TenantModel) {
+          final tenant = settings.arguments as TenantModel;
+          return MaterialPageRoute(builder: (_) => TenantDetailView(tenant: tenant));
+        }
+        return MaterialPageRoute(builder: (_) => const KosListView());
       case tenantForm:
-        final args = settings.arguments as Map<String, dynamic>;
+        final args = settings.arguments as Map<String, dynamic>? ?? {};
         return MaterialPageRoute(builder: (_) => TenantFormView(
-          kosId: args['kosId'] as String,
+          kosId: args['kosId'] as String? ?? '',
           tenant: args['tenant'] as TenantModel?,
         ));
       case paymentList:

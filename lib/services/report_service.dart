@@ -39,7 +39,7 @@ class ReportService {
                 data: <List<String>>[
                   <String>['ID Payment', 'Jumlah (Rp)', 'Jatuh Tempo', 'Status'],
                   ...payments.map((p) => [
-                        p.id.substring(0, 8),
+                        p.id.length >= 8 ? p.id.substring(0, 8) : p.id,
                         p.amount.toStringAsFixed(0),
                         '${p.dueDate.day}/${p.dueDate.month}/${p.dueDate.year}',
                         p.status.toUpperCase(),
