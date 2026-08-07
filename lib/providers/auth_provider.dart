@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:kosmo/models/user_model.dart';
 import 'package:kosmo/services/auth_service.dart';
 
@@ -13,6 +14,23 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isAuthenticated => _authService.currentUser != null;
 
+  String _parseError(dynamic e) {
+    final str = e.toString();
+    if (e is AuthException) {
+      if (str.contains('User already registered') || str.contains('already exists')) {
+        return 'Email ini sudah terdaftar. Silakan gunakan email lain atau login.';
+      }
+      if (str.contains('Invalid login credentials')) {
+        return 'Email atau password salah. Silakan periksa kembali.';
+      }
+      return e.message;
+    }
+    if (str.contains('AuthRetryableFetchException') || str.contains('SocketException') || str.contains('ClientException')) {
+      return 'Gagal terhubung ke server Supabase. Pastikan koneksi internet aktif dan coba lagi.';
+    }
+    return str;
+  }
+
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     _error = null;
@@ -24,7 +42,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = _parseError(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -41,7 +59,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = _parseError(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -59,7 +77,7 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = _parseError(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -75,7 +93,7 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = _parseError(e);
       _isLoading = false;
       notifyListeners();
     }
