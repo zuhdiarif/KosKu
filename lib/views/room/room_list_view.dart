@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kosmo/theme/kosmo_theme.dart';
+import 'package:kosmo/utils/routes.dart';
+import 'package:kosmo/components/kosmo_app_bar.dart';
 
 class RoomListView extends StatelessWidget {
   const RoomListView({super.key});
@@ -7,18 +9,8 @@ class RoomListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Manajemen Kamar',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF111827),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      backgroundColor: KosmoTheme.background,
+      appBar: const KosmoAppBar(title: 'Manajemen Kamar'),
       body: Column(
         children: [
           Container(
@@ -45,28 +37,34 @@ class RoomListView extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: 4,
               itemBuilder: (context, index) {
+                final isOccupied = index % 2 == 0;
                 return InkWell(
                   onTap: () {
-                    Navigator.pushNamed(context, '/room-detail');
+                    Navigator.pushNamed(context, AppRoutes.roomDetail);
                   },
                   child: Card(
                     margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF3F4F6),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Center(
-                              child: Icon(Icons.meeting_room, color: Color(0xFF6B7280)),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              'assets/images/room_interior.jpg',
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                width: 64,
+                                height: 64,
+                                color: KosmoTheme.primary.withValues(alpha: 0.1),
+                                child: const Icon(Icons.meeting_room, color: KosmoTheme.primary),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -79,35 +77,38 @@ class RoomListView extends StatelessWidget {
                                   children: [
                                     Text(
                                       'Kamar ${101 + index}',
-                                      style: GoogleFonts.poppins(
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16,
-                                        color: const Color(0xFF111827),
+                                        color: KosmoTheme.textPrimary,
                                       ),
                                     ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
-                                        color: index % 2 == 0 ? const Color(0xFFFEE2E2) : const Color(0xFFD1FAE5),
+                                        color: isOccupied ? KosmoTheme.errorContainer : KosmoTheme.primary.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
-                                        index % 2 == 0 ? 'Terisi' : 'Tersedia',
-                                        style: GoogleFonts.poppins(
+                                        isOccupied ? 'Terisi' : 'Tersedia',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
                                           fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                          color: index % 2 == 0 ? const Color(0xFFDC2626) : const Color(0xFF047857),
+                                          fontWeight: FontWeight.w600,
+                                          color: isOccupied ? KosmoTheme.error : KosmoTheme.primary,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  'Lantai 1 • Rp 1.500.000',
-                                  style: GoogleFonts.poppins(
+                                const Text(
+                                  'Lantai 1 • Rp 1.500.000 / bln',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
                                     fontSize: 12,
-                                    color: const Color(0xFF6B7280),
+                                    color: KosmoTheme.textSecondary,
                                   ),
                                 ),
                               ],
@@ -125,9 +126,9 @@ class RoomListView extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/room-form');
+          Navigator.pushNamed(context, AppRoutes.roomForm);
         },
-        backgroundColor: const Color(0xFF047857),
+        backgroundColor: KosmoTheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -137,18 +138,19 @@ class RoomListView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF047857) : Colors.white,
+        color: isSelected ? KosmoTheme.primary : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isSelected ? const Color(0xFF047857) : const Color(0xFFD1D5DB),
+          color: isSelected ? KosmoTheme.primary : Colors.grey.withValues(alpha: 0.3),
         ),
       ),
       child: Text(
         label,
-        style: GoogleFonts.poppins(
+        style: TextStyle(
+          fontFamily: 'Poppins',
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: isSelected ? Colors.white : const Color(0xFF374151),
+          color: isSelected ? Colors.white : KosmoTheme.textPrimary,
         ),
       ),
     );

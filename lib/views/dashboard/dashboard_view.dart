@@ -29,25 +29,40 @@ class DashboardView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            const Text(
-              'Selamat Pagi,',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                color: KosmoTheme.textSecondary,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 36,
+                width: 36,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.apartment_rounded, color: KosmoTheme.primary, size: 32),
               ),
             ),
-            Text(
-              user?.fullName ?? 'Owner Kosmo',
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: KosmoTheme.textPrimary,
-              ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Selamat Pagi,',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 12,
+                    color: KosmoTheme.textSecondary,
+                  ),
+                ),
+                Text(
+                  user?.fullName ?? 'Owner Kosmo',
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: KosmoTheme.textPrimary,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

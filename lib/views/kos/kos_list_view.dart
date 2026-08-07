@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:kosmo/theme/kosmo_theme.dart';
+import 'package:kosmo/utils/routes.dart';
+import 'package:kosmo/components/kosmo_app_bar.dart';
+import 'package:kosmo/components/kosmo_bottom_nav.dart';
 
 class KosListView extends StatelessWidget {
   const KosListView({super.key});
 
+  void _onNavTap(BuildContext context, int index) {
+    if (index == 0) {
+      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+    } else if (index == 2) {
+      Navigator.pushReplacementNamed(context, AppRoutes.paymentList);
+    } else if (index == 3) {
+      Navigator.pushReplacementNamed(context, AppRoutes.profile);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Daftar Kos',
-          style: GoogleFonts.poppins(
-            color: const Color(0xFF111827),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      backgroundColor: KosmoTheme.background,
+      appBar: const KosmoAppBar(title: 'Daftar Kos'),
       body: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: 2,
@@ -26,13 +29,13 @@ class KosListView extends StatelessWidget {
         itemBuilder: (context, index) {
           return InkWell(
             onTap: () {
-              Navigator.pushNamed(context, '/kos-detail');
+              Navigator.pushNamed(context, AppRoutes.kosDetail);
             },
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -43,14 +46,20 @@ class KosListView extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD1FAE5),
-                      borderRadius: BorderRadius.circular(8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'assets/images/kos_building.jpg',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 80,
+                        height: 80,
+                        color: KosmoTheme.primary.withValues(alpha: 0.1),
+                        child: const Icon(Icons.home_work, color: KosmoTheme.primary, size: 40),
+                      ),
                     ),
-                    child: const Icon(Icons.home_work, color: Color(0xFF047857), size: 40),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -58,28 +67,31 @@ class KosListView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Kos Mawar ${index + 1}',
-                          style: GoogleFonts.poppins(
+                          'Kosmo Mawar ${index + 1}',
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
-                            color: const Color(0xFF111827),
+                            color: KosmoTheme.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Jl. Sudirman No. $index',
-                          style: GoogleFonts.poppins(
+                          'Jl. Sudirman No. ${10 + index}',
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
                             fontSize: 12,
-                            color: const Color(0xFF6B7280),
+                            color: KosmoTheme.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          '15 Kamar',
-                          style: GoogleFonts.poppins(
+                        const Text(
+                          '15 Kamar • Terisi 12',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
                             fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF047857),
+                            fontWeight: FontWeight.w600,
+                            color: KosmoTheme.primary,
                           ),
                         ),
                       ],
@@ -93,10 +105,14 @@ class KosListView extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/kos-form');
+          Navigator.pushNamed(context, AppRoutes.kosForm);
         },
-        backgroundColor: const Color(0xFF047857),
+        backgroundColor: KosmoTheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+      bottomNavigationBar: KosmoBottomNav(
+        currentIndex: 1,
+        onTap: (index) => _onNavTap(context, index),
       ),
     );
   }
