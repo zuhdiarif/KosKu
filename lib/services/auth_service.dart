@@ -16,18 +16,11 @@ class AuthService {
   }
 
   Future<AuthResponse> register(String email, String password, String fullName) async {
-    final response = await _client.auth.signUp(
+    return await _client.auth.signUp(
       email: email,
       password: password,
+      data: {'full_name': fullName},
     );
-    if (response.user != null) {
-      await _client.from('users').upsert({
-        'id': response.user!.id,
-        'email': email,
-        'full_name': fullName,
-      });
-    }
-    return response;
   }
 
   Future<AuthResponse> verifyOtp(String email, String token) async {
@@ -49,7 +42,8 @@ class AuthService {
   Future<UserModel?> getUserProfile() async {
     final user = currentUser;
     if (user == null) return null;
-    final data = await _client.from('users').select().eq('id', user.id).single();
+    final data = await _client.from('users').select().eq('id', user.id).maybeSingle();
+    if (data == null) return null;
     return UserModel.fromJson(data);
   }
 }

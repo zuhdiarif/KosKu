@@ -5,6 +5,7 @@ import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/components/kosmo_app_bar.dart';
 import 'package:kosmo/components/kosmo_bottom_nav.dart';
 import 'package:kosmo/components/kosmo_button.dart';
+import 'package:kosmo/components/kosmo_dialog.dart';
 import 'package:kosmo/providers/auth_provider.dart';
 import 'package:kosmo/services/report_service.dart';
 import 'package:kosmo/models/kos_model.dart';
@@ -65,6 +66,23 @@ class _ProfileViewState extends State<ProfileView> {
       kos: dummyKos,
       payments: dummyPayments,
     );
+  }
+
+  void _handleLogout() async {
+    final confirm = await KosmoDialog.showConfirm(
+      context: context,
+      title: 'Konfirmasi Keluar',
+      message: 'Apakah Anda yakin ingin keluar dari akun Kosmo?',
+      confirmLabel: 'Ya, Keluar',
+      isDangerous: true,
+    );
+
+    if (confirm && mounted) {
+      await context.read<AuthProvider>().logout();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
+      }
+    }
   }
 
   @override
@@ -176,12 +194,7 @@ class _ProfileViewState extends State<ProfileView> {
               child: KosmoButton(
                 label: 'Keluar',
                 variant: KosmoButtonVariant.outline,
-                onPressed: () async {
-                  await context.read<AuthProvider>().logout();
-                  if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, AppRoutes.login);
-                  }
-                },
+                onPressed: _handleLogout,
               ),
             ),
             const SizedBox(height: 32),
