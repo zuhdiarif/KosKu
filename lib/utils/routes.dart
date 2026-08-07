@@ -18,6 +18,7 @@ import 'package:kosmo/views/tenant/tenant_list_view.dart';
 import 'package:kosmo/views/tenant/tenant_detail_view.dart';
 import 'package:kosmo/views/tenant/tenant_form_view.dart';
 import 'package:kosmo/views/payment/payment_list_view.dart';
+import 'package:kosmo/views/payment/payment_detail_view.dart';
 import 'package:kosmo/views/payment/payment_form_view.dart';
 import 'package:kosmo/views/notification/notification_view.dart';
 import 'package:kosmo/views/profile/profile_view.dart';
@@ -38,6 +39,7 @@ class AppRoutes {
   static const String tenantDetail = '/tenant/detail';
   static const String tenantForm = '/tenant/form';
   static const String paymentList = '/payment';
+  static const String paymentDetail = '/payment/detail';
   static const String paymentForm = '/payment/form';
   static const String notifications = '/notifications';
   static const String profile = '/profile';
@@ -97,6 +99,12 @@ class AppRoutes {
           tenant: args['tenant'] as TenantModel?,
         ));
       case paymentList:
+        return MaterialPageRoute(builder: (_) => const PaymentListView());
+      case paymentDetail:
+        if (settings.arguments is PaymentModel) {
+          final payment = settings.arguments as PaymentModel;
+          return MaterialPageRoute(builder: (_) => PaymentDetailView(payment: payment));
+        }
         return MaterialPageRoute(builder: (_) => const PaymentListView());
       case paymentForm:
         final payment = settings.arguments as PaymentModel?;

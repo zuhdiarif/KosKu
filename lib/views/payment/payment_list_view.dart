@@ -184,10 +184,13 @@ class _PaymentListViewState extends State<PaymentListView> {
     final tenantPhone = tenantList.isNotEmpty ? tenantList.first.phone : '';
     final tenantEmail = tenantList.isNotEmpty ? (tenantList.first.email ?? '') : '';
 
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 12),
-      color: Theme.of(context).cardColor,
+    return InkWell(
+      onTap: () => Navigator.pushNamed(context, AppRoutes.paymentDetail, arguments: payment),
+      borderRadius: BorderRadius.circular(16),
+      child: Card(
+        elevation: 2,
+        margin: const EdgeInsets.only(bottom: 12),
+        color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -295,6 +298,7 @@ class _PaymentListViewState extends State<PaymentListView> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
