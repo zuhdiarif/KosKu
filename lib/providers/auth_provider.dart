@@ -84,6 +84,23 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> resendOtp(String email) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _authService.resendOtp(email);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = _parseError(e);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<void> resetPassword(String email) async {
     _isLoading = true;
     _error = null;

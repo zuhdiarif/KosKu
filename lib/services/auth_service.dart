@@ -24,9 +24,24 @@ class AuthService {
   }
 
   Future<AuthResponse> verifyOtp(String email, String token) async {
-    return await _client.auth.verifyOTP(
+    try {
+      return await _client.auth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.signup,
+      );
+    } catch (_) {
+      return await _client.auth.verifyOTP(
+        email: email,
+        token: token,
+        type: OtpType.email,
+      );
+    }
+  }
+
+  Future<void> resendOtp(String email) async {
+    await _client.auth.resend(
       email: email,
-      token: token,
       type: OtpType.signup,
     );
   }
