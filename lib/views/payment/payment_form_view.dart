@@ -1,13 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/components/kosmo_app_bar.dart';
 import 'package:kosmo/components/kosmo_text_field.dart';
 import 'package:kosmo/components/kosmo_button.dart';
+import 'package:kosmo/components/kosmo_dialog.dart';
+import 'package:kosmo/models/payment_model.dart';
+import 'package:kosmo/providers/payment_provider.dart';
 
 class PaymentFormView extends StatefulWidget {
-  const PaymentFormView({super.key});
+  final PaymentModel? payment;
+  const PaymentFormView({super.key, this.payment});
 
   @override
   State<PaymentFormView> createState() => _PaymentFormViewState();
@@ -17,15 +22,40 @@ class _PaymentFormViewState extends State<PaymentFormView> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
+  final _tenantIdController = TextEditingController();
+  final _roomIdController = TextEditingController();
   DateTime? _selectedDate;
   String _status = 'pending';
   final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.payment != null) {
+      _amountController.text = widget.payment!.amount.toString();
+      _notesController.text = widget.payment!.notes ?? '';
+      _tenantIdController.text = widget.payment!.tenantId;
+      _roomIdController.text = widget.payment!.roomId;
+      _selectedDate = widget.payment!.dueDate;
+      _status = widget.payment!.status;
+    }
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _notesController.dispose();
+    _tenantIdController.dispose();
+    _roomIdController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickDate() async {
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
@@ -45,20 +75,62 @@ class _PaymentFormViewState extends State<PaymentFormView> {
     }
   }
 
-  void _save() {
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedDate == null) {
+      KosmoDialog.showError(context: context, title: 'Error', message: 'Tanggal jatuh tempo harus dipilih');
+      return;
+    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Catatan pembayaran berhasil disimpan.')),
+    setState(() {
+      _isSaving = true;
+    });
+
+    final paymentProvider = context.read<PaymentProvider>();
+    final isEdit = widget.payment != null;
+    
+    final newPayment = PaymentModel(
+      id: isEdit ? widget.payment!.id : DateTime.now().millisecondsSinceEpoch.toString(),
+      tenantId: _tenantIdController.text,
+      roomId: _roomIdController.text,
+      amount: double.tryParse(_amountController.text) ?? 0,
+      dueDate: _selectedDate!,
+      status: _status,
+      notes: _notesController.text,
+      createdAt: isEdit ? widget.payment!.createdAt : DateTime.now(),
+      paymentDate: _status == 'paid' ? DateTime.now() : null,
+      proofUrl: _imageFile?.path, // Simplified for this example
     );
-    Navigator.pop(context);
+
+    bool success = false;
+    if (isEdit) {
+      success = await paymentProvider.update(newPayment);
+    } else {
+      success = await paymentProvider.create(newPayment);
+    }
+
+    setState(() {
+      _isSaving = false;
+    });
+
+    if (success) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Catatan pembayaran berhasil disimpan.')),
+        );
+        Navigator.pop(context);
+      }
+    } else {
+      if (mounted) {
+        KosmoDialog.showError(context: context, title: 'Gagal Menyimpan', message: paymentProvider.error ?? 'Terjadi kesalahan');
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const KosmoAppBar(title: 'Form Pembayaran'),
-      backgroundColor: KosmoTheme.background,
+      appBar: KosmoAppBar(title: widget.payment == null ? 'Form Pembayaran' : 'Edit Pembayaran'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Form(
@@ -67,10 +139,21 @@ class _PaymentFormViewState extends State<PaymentFormView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               KosmoTextField(
-                label: 'Nama Penghuni & Kamar',
+                controller: _tenantIdController,
+                label: 'ID Penghuni',
                 prefixIcon: Icons.person_outline_rounded,
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) return 'Pilih penghuni / kamar';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              KosmoTextField(
+                controller: _roomIdController,
+                label: 'ID Kamar',
+                prefixIcon: Icons.door_front_door_outlined,
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'ID Kamar wajib diisi';
                   return null;
                 },
               ),
@@ -172,10 +255,12 @@ class _PaymentFormViewState extends State<PaymentFormView> {
                 ),
               ),
               const SizedBox(height: 28),
-              KosmoButton(
-                label: 'Simpan Pembayaran',
-                onPressed: _save,
-              ),
+              _isSaving
+                  ? const Center(child: CircularProgressIndicator())
+                  : KosmoButton(
+                      label: widget.payment == null ? 'Simpan Pembayaran' : 'Update Pembayaran',
+                      onPressed: _save,
+                    ),
             ],
           ),
         ),

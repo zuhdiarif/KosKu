@@ -5,10 +5,28 @@ import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/components/kosmo_bottom_nav.dart';
 import 'package:kosmo/components/connectivity_banner.dart';
 import 'package:kosmo/providers/auth_provider.dart';
+import 'package:kosmo/providers/payment_provider.dart';
+import 'package:kosmo/providers/kos_provider.dart';
 import 'package:kosmo/services/whatsapp_service.dart';
+import 'package:intl/intl.dart';
 
-class DashboardView extends StatelessWidget {
+class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
+
+  @override
+  State<DashboardView> createState() => _DashboardViewState();
+}
+
+class _DashboardViewState extends State<DashboardView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<KosProvider>().loadAll();
+      context.read<PaymentProvider>().loadAll();
+      context.read<PaymentProvider>().loadOverdue();
+    });
+  }
 
   void _onNavTap(BuildContext context, int index) {
     if (index == 1) {
@@ -23,11 +41,20 @@ class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final paymentProvider = context.watch<PaymentProvider>();
+    final kosProvider = context.watch<KosProvider>();
+
+    double totalRevenue = paymentProvider.paymentList
+        .where((e) => e.status == 'paid')
+        .fold(0.0, (sum, e) => sum + e.amount);
+
+    final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    
+    int totalProperties = kosProvider.kosList.length;
 
     return Scaffold(
-      backgroundColor: KosmoTheme.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).cardColor,
         elevation: 0,
         title: Row(
           children: [
@@ -113,7 +140,7 @@ class DashboardView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Pendapatan Bulan Ini',
+                          'Pendapatan Lunas',
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             color: Colors.white70,
@@ -121,9 +148,9 @@ class DashboardView extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Rp 12.500.000',
-                          style: TextStyle(
+                        Text(
+                          formatCurrency.format(totalRevenue),
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             color: Colors.white,
                             fontSize: 28,
@@ -138,7 +165,7 @@ class DashboardView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text(
-                            '+15% dari bulan lalu',
+                            '+ Total Semua Kos',
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               color: Colors.white,
@@ -154,7 +181,7 @@ class DashboardView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
@@ -166,22 +193,22 @@ class DashboardView extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Tingkat Hunian',
+                              const Text(
+                                'Properti Anda',
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   color: KosmoTheme.textSecondary,
                                   fontSize: 14,
                                 ),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
-                                '18/20 Kamar Terisi',
-                                style: TextStyle(
+                                '$totalProperties Kos',
+                                style: const TextStyle(
                                   fontFamily: 'Poppins',
                                   color: KosmoTheme.textPrimary,
                                   fontSize: 18,
@@ -191,28 +218,20 @@ class DashboardView extends StatelessWidget {
                             ],
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 60,
                           width: 60,
                           child: Stack(
                             fit: StackFit.expand,
-                            children: const [
+                            children: [
                               CircularProgressIndicator(
-                                value: 18 / 20,
+                                value: 1.0,
                                 backgroundColor: Color(0xFFF3F4F6),
                                 valueColor: AlwaysStoppedAnimation<Color>(KosmoTheme.primary),
                                 strokeWidth: 8,
                               ),
                               Center(
-                                child: Text(
-                                  '90%',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    color: KosmoTheme.textPrimary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
+                                child: Icon(Icons.home_work, color: KosmoTheme.primary),
                               ),
                             ],
                           ),
@@ -247,9 +266,33 @@ class DashboardView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _buildOverdueCard('Andi Wijaya', 'Kamar A102', 3, '081234567891', 'andi@example.com'),
-                  const SizedBox(height: 8),
-                  _buildOverdueCard('Siti Aminah', 'Kamar B205', 1, '081234567892', 'siti@example.com'),
+                  if (paymentProvider.isLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (paymentProvider.overdueList.isEmpty)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text(
+                          'Tidak ada tagihan tertunggak 🎉',
+                          style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary),
+                        ),
+                      ),
+                    )
+                  else
+                    ...paymentProvider.overdueList.map((payment) {
+                      final days = DateTime.now().difference(payment.dueDate).inDays;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: _buildOverdueCard(
+                          payment.tenantId, 
+                          payment.roomId, 
+                          days > 0 ? days : 0, 
+                          '08123456789', // Dummy phone 
+                          'tenant@example.com',
+                          formatCurrency.format(payment.amount),
+                        ),
+                      );
+                    }),
                 ],
               ),
             ),
@@ -263,11 +306,11 @@ class DashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildOverdueCard(String name, String room, int days, String phone, String email) {
+  Widget _buildOverdueCard(String name, String room, int days, String phone, String email, String amountStr) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
       ),
@@ -276,7 +319,7 @@ class DashboardView extends StatelessWidget {
           CircleAvatar(
             backgroundColor: KosmoTheme.errorContainer,
             child: Text(
-              name[0],
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 color: KosmoTheme.error,
@@ -314,8 +357,8 @@ class DashboardView extends StatelessWidget {
                 onPressed: () => WhatsappService.sendReminder(
                   phone: phone,
                   tenantName: name,
-                  month: 'Agustus 2026',
-                  amount: '1.500.000',
+                  month: DateFormat('MMMM yyyy').format(DateTime.now()),
+                  amount: amountStr,
                 ),
                 icon: const Icon(Icons.message, color: KosmoTheme.success, size: 20),
                 constraints: const BoxConstraints(),
@@ -325,8 +368,8 @@ class DashboardView extends StatelessWidget {
                 onPressed: () => WhatsappService.sendEmail(
                   email: email,
                   tenantName: name,
-                  month: 'Agustus 2026',
-                  amount: '1.500.000',
+                  month: DateFormat('MMMM yyyy').format(DateTime.now()),
+                  amount: amountStr,
                   ownerName: 'Owner',
                 ),
                 icon: const Icon(Icons.email, color: KosmoTheme.secondary, size: 20),

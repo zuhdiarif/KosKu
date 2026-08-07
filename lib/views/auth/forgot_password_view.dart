@@ -40,7 +40,6 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KosmoTheme.background,
       appBar: const KosmoAppBar(title: 'Lupa Password'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),

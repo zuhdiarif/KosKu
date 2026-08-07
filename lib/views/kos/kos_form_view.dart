@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:kosmo/providers/kos_provider.dart';
+import 'package:kosmo/providers/auth_provider.dart';
+import 'package:kosmo/models/kos_model.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/components/kosmo_app_bar.dart';
 import 'package:kosmo/components/kosmo_text_field.dart';
 import 'package:kosmo/components/kosmo_button.dart';
+import 'package:kosmo/components/kosmo_dialog.dart';
 
 class KosFormView extends StatefulWidget {
-  const KosFormView({super.key});
+  final KosModel? kos;
+  
+  const KosFormView({super.key, this.kos});
 
   @override
   State<KosFormView> createState() => _KosFormViewState();
@@ -13,25 +20,83 @@ class KosFormView extends StatefulWidget {
 
 class _KosFormViewState extends State<KosFormView> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _descController = TextEditingController();
-  final _roomsController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _descController;
+  late final TextEditingController _roomsController;
+  bool _isSaving = false;
 
-  void _save() {
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.kos?.name ?? '');
+    _addressController = TextEditingController(text: widget.kos?.address ?? '');
+    _descController = TextEditingController(text: widget.kos?.description ?? '');
+    _roomsController = TextEditingController(text: widget.kos?.totalRooms.toString() ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _addressController.dispose();
+    _descController.dispose();
+    _roomsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Data kos berhasil disimpan.')),
+    setState(() {
+      _isSaving = true;
+    });
+
+    final authProvider = context.read<AuthProvider>();
+    final kosProvider = context.read<KosProvider>();
+
+    final isEditing = widget.kos != null;
+
+    final kosModel = KosModel(
+      id: widget.kos?.id ?? '',
+      ownerId: widget.kos?.ownerId ?? authProvider.user?.id ?? '',
+      name: _nameController.text.trim(),
+      address: _addressController.text.trim(),
+      description: _descController.text.trim(),
+      totalRooms: int.parse(_roomsController.text.trim()),
+      createdAt: widget.kos?.createdAt ?? DateTime.now(),
     );
-    Navigator.pop(context);
+
+    bool success;
+    if (isEditing) {
+      success = await kosProvider.update(kosModel);
+    } else {
+      success = await kosProvider.create(kosModel);
+    }
+
+    if (mounted) {
+      setState(() {
+        _isSaving = false;
+      });
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data kos berhasil disimpan.')),
+        );
+        Navigator.pop(context);
+      } else {
+        KosmoDialog.showError(
+          context: context,
+          title: 'Gagal Menyimpan',
+          message: kosProvider.error ?? 'Terjadi kesalahan yang tidak diketahui.',
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KosmoTheme.background,
-      appBar: const KosmoAppBar(title: 'Formulir Kosmo'),
+      appBar: KosmoAppBar(title: widget.kos == null ? 'Tambah Kos' : 'Edit Kos'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -45,9 +110,9 @@ class _KosFormViewState extends State<KosFormView> {
                   height: 160,
                   width: double.infinity,
                   color: KosmoTheme.primary.withValues(alpha: 0.08),
-                  child: Column(
+                  child: const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Icon(Icons.add_a_photo_outlined, size: 40, color: KosmoTheme.primary),
                       SizedBox(height: 8),
                       Text(
@@ -104,10 +169,12 @@ class _KosFormViewState extends State<KosFormView> {
                 },
               ),
               const SizedBox(height: 32),
-              KosmoButton(
-                label: 'Simpan Data Kos',
-                onPressed: _save,
-              ),
+              _isSaving
+                  ? const Center(child: CircularProgressIndicator(color: KosmoTheme.primary))
+                  : KosmoButton(
+                      label: 'Simpan Data Kos',
+                      onPressed: _save,
+                    ),
             ],
           ),
         ),

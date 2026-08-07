@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/components/kosmo_app_bar.dart';
 import 'package:kosmo/components/kosmo_bottom_nav.dart';
 import 'package:kosmo/components/kosmo_text_field.dart';
+import 'package:kosmo/components/kosmo_empty_state.dart';
+import 'package:kosmo/components/kosmo_button.dart';
 import 'package:kosmo/services/whatsapp_service.dart';
+import 'package:kosmo/providers/payment_provider.dart';
+import 'package:kosmo/models/payment_model.dart';
+import 'package:intl/intl.dart';
 
 class PaymentListView extends StatefulWidget {
   const PaymentListView({super.key});
@@ -18,6 +24,23 @@ class _PaymentListViewState extends State<PaymentListView> {
   final List<String> _filters = ['Semua', 'Lunas', 'Pending', 'Nunggak'];
   final _searchController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PaymentProvider>().loadAll();
+    });
+    _searchController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   void _onNavTap(int index) {
     if (index == 0) {
       Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
@@ -29,14 +52,32 @@ class _PaymentListViewState extends State<PaymentListView> {
   }
 
   Future<void> _refreshData() async {
-    await Future.delayed(const Duration(milliseconds: 600));
+    await context.read<PaymentProvider>().loadAll();
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PaymentProvider>();
+
+    List<PaymentModel> filtered = provider.paymentList;
+    if (_selectedFilter == 'Lunas') {
+      filtered = filtered.where((e) => e.status == 'paid').toList();
+    } else if (_selectedFilter == 'Pending') {
+      filtered = filtered.where((e) => e.status == 'pending').toList();
+    } else if (_selectedFilter == 'Nunggak') {
+      filtered = filtered.where((e) => e.status == 'overdue').toList();
+    }
+
+    if (_searchController.text.isNotEmpty) {
+      final q = _searchController.text.toLowerCase();
+      filtered = filtered.where((e) => 
+        (e.notes?.toLowerCase().contains(q) ?? false) || 
+        (e.tenantId.toLowerCase().contains(q))
+      ).toList();
+    }
+
     return Scaffold(
       appBar: const KosmoAppBar(title: 'Riwayat Pembayaran'),
-      backgroundColor: KosmoTheme.background,
       body: Column(
         children: [
           Padding(
@@ -84,17 +125,36 @@ class _PaymentListViewState extends State<PaymentListView> {
             ),
           ),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshData,
-              color: KosmoTheme.primary,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16.0),
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return _buildPaymentCard(index);
-                },
-              ),
-            ),
+            child: provider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : provider.error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(provider.error!, style: const TextStyle(fontFamily: 'Poppins', color: KosmoTheme.error)),
+                            const SizedBox(height: 16),
+                            KosmoButton(label: 'Coba Lagi', onPressed: _refreshData, variant: KosmoButtonVariant.outline),
+                          ],
+                        ),
+                      )
+                    : filtered.isEmpty
+                        ? const KosmoEmptyState(
+                            icon: Icons.receipt_long_rounded,
+                            title: 'Belum Ada Pembayaran',
+                            subtitle: 'Daftar pembayaran akan muncul di sini',
+                          )
+                        : RefreshIndicator(
+                            onRefresh: _refreshData,
+                            color: KosmoTheme.primary,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16.0),
+                              itemCount: filtered.length,
+                              itemBuilder: (context, index) {
+                                return _buildPaymentCard(filtered[index]);
+                              },
+                            ),
+                          ),
           ),
         ],
       ),
@@ -110,10 +170,18 @@ class _PaymentListViewState extends State<PaymentListView> {
     );
   }
 
-  Widget _buildPaymentCard(int index) {
+  Widget _buildPaymentCard(PaymentModel payment) {
+    final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final isLunas = payment.status == 'paid';
+    final isOverdue = payment.status == 'overdue';
+
+    Color statusColor = isLunas ? KosmoTheme.primary : (isOverdue ? KosmoTheme.error : KosmoTheme.warning);
+    String statusText = isLunas ? 'Lunas' : (isOverdue ? 'Nunggak' : 'Pending');
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 12),
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -123,36 +191,41 @@ class _PaymentListViewState extends State<PaymentListView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Penghuni ${index + 1} - Kamar ${101 + index}',
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                Expanded(
+                  child: Text(
+                    payment.notes?.isNotEmpty == true ? payment.notes! : 'Pembayaran',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: index % 2 == 0 ? KosmoTheme.primary.withValues(alpha: 0.1) : KosmoTheme.warning.withValues(alpha: 0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    index % 2 == 0 ? 'Lunas' : 'Pending',
+                    statusText,
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: index % 2 == 0 ? KosmoTheme.primary : KosmoTheme.warning,
+                      color: statusColor,
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Rp 1.500.000',
-              style: TextStyle(
+            Text(
+              formatCurrency.format(payment.amount),
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w700,
                 fontSize: 20,
@@ -161,7 +234,7 @@ class _PaymentListViewState extends State<PaymentListView> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Jatuh Tempo: ${15 + index} Agustus 2026',
+              'Jatuh Tempo: ${DateFormat('dd MMM yyyy').format(payment.dueDate)}',
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 12,
@@ -172,12 +245,18 @@ class _PaymentListViewState extends State<PaymentListView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                IconButton(
+                  onPressed: () {
+                    context.read<PaymentProvider>().delete(payment.id);
+                  },
+                  icon: const Icon(Icons.delete_outline, size: 20, color: KosmoTheme.error),
+                ),
                 TextButton.icon(
                   onPressed: () => WhatsappService.sendEmail(
-                    email: 'penghuni$index@example.com',
-                    tenantName: 'Penghuni ${index + 1}',
-                    month: 'Agustus 2026',
-                    amount: '1.500.000',
+                    email: 'penghuni@example.com', // dummy fallback if user email not available
+                    tenantName: payment.tenantId,
+                    month: DateFormat('MMMM yyyy').format(payment.dueDate),
+                    amount: formatCurrency.format(payment.amount),
                     ownerName: 'Owner Kosmo',
                   ),
                   icon: const Icon(Icons.email_outlined, size: 16),
@@ -189,10 +268,10 @@ class _PaymentListViewState extends State<PaymentListView> {
                 const SizedBox(width: 8),
                 ElevatedButton.icon(
                   onPressed: () => WhatsappService.sendReminder(
-                    phone: '08123456789$index',
-                    tenantName: 'Penghuni ${index + 1}',
-                    month: 'Agustus 2026',
-                    amount: '1.500.000',
+                    phone: '08123456789', // dummy fallback
+                    tenantName: payment.tenantId,
+                    month: DateFormat('MMMM yyyy').format(payment.dueDate),
+                    amount: formatCurrency.format(payment.amount),
                   ),
                   icon: const Icon(Icons.message_outlined, size: 16),
                   label: const Text('WA'),

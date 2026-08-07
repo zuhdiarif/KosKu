@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
+import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/providers/auth_provider.dart';
 import 'package:kosmo/components/kosmo_text_field.dart';
 import 'package:kosmo/components/kosmo_button.dart';
 import 'package:kosmo/components/kosmo_dialog.dart';
-import 'package:kosmo/views/auth/register_view.dart';
-import 'package:kosmo/views/dashboard/dashboard_view.dart';
-import 'package:kosmo/views/auth/forgot_password_view.dart';
-import 'package:kosmo/views/auth/verify_otp_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -28,7 +25,7 @@ class _LoginViewState extends State<LoginView> {
     final auth = context.read<AuthProvider>();
     final success = await auth.login(_emailController.text.trim(), _passwordController.text);
     if (success && mounted) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const DashboardView()));
+      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
     } else if (auth.error != null && mounted) {
       final err = auth.error!;
       if (err.contains('Email not confirmed') || err.contains('unconfirmed')) {
@@ -37,12 +34,7 @@ class _LoginViewState extends State<LoginView> {
           title: 'Email Belum Diverifikasi',
           message: 'Silakan masukkan kode verifikasi (OTP) yang telah dikirimkan ke email Anda.',
         );
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => VerifyOtpView(email: _emailController.text.trim()),
-          ),
-        );
+        Navigator.pushNamed(context, AppRoutes.verifyOtp, arguments: _emailController.text.trim());
       } else {
         KosmoDialog.showError(
           context: context,
@@ -56,7 +48,6 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KosmoTheme.background,
       appBar: AppBar(title: const Text('Login Kosmo')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -130,7 +121,7 @@ class _LoginViewState extends State<LoginView> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordView())),
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
                   child: const Text(
                     'Lupa Password?',
                     style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.primary, fontWeight: FontWeight.w500),
@@ -152,7 +143,7 @@ class _LoginViewState extends State<LoginView> {
                 children: [
                   const Text('Belum punya akun? ', style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary)),
                   GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterView())),
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.register),
                     child: const Text(
                       'Daftar Sekarang',
                       style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.primary, fontWeight: FontWeight.bold),

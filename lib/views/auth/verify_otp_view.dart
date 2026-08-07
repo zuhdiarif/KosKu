@@ -38,7 +38,6 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const KosmoAppBar(title: 'Verifikasi Email'),
-      backgroundColor: KosmoTheme.background,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

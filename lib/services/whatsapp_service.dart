@@ -15,7 +15,14 @@ class WhatsappService {
         .replaceAll('{amount}', amount);
     final encodedMessage = Uri.encodeComponent(message);
     final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
-    final waPhone = cleanPhone.startsWith('0') ? '62${cleanPhone.substring(1)}' : cleanPhone;
+    final String waPhone;
+    if (cleanPhone.startsWith('62')) {
+      waPhone = cleanPhone;
+    } else if (cleanPhone.startsWith('0')) {
+      waPhone = '62${cleanPhone.substring(1)}';
+    } else {
+      waPhone = '62$cleanPhone';
+    }
     final uri = Uri.parse('https://wa.me/$waPhone?text=$encodedMessage');
     return await launchUrl(uri, mode: LaunchMode.externalApplication);
   }

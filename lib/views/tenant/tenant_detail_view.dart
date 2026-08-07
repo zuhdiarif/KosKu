@@ -1,44 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/components/kosmo_dialog.dart';
 import 'package:kosmo/services/whatsapp_service.dart';
+import 'package:kosmo/models/tenant_model.dart';
+import 'package:kosmo/providers/tenant_provider.dart';
 
 class TenantDetailView extends StatelessWidget {
-  const TenantDetailView({super.key});
+  final TenantModel tenant;
+
+  const TenantDetailView({super.key, required this.tenant});
 
   void _handleDelete(BuildContext context) async {
     final confirm = await KosmoDialog.showConfirm(
       context: context,
       title: 'Hapus Data Penghuni',
-      message: 'Apakah Anda yakin ingin menghapus data penghuni Andi Wijaya?',
+      message: 'Apakah Anda yakin ingin menghapus data penghuni ${tenant.name}?',
       confirmLabel: 'Ya, Hapus',
       isDangerous: true,
     );
 
     if (confirm && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data penghuni berhasil dihapus.')),
-      );
-      Navigator.pop(context);
+      final success = await context.read<TenantProvider>().delete(tenant.id, tenant.kosId);
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data penghuni berhasil dihapus.')),
+        );
+        Navigator.pop(context);
+      } else if (context.mounted) {
+        KosmoDialog.showError(
+          context: context,
+          title: 'Gagal',
+          message: context.read<TenantProvider>().error ?? 'Gagal menghapus penghuni',
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const tenantName = 'Andi Wijaya';
-    const roomNumber = 'Kamar 101';
-    const phone = '081234567890';
-    const email = 'andi.wijaya@email.com';
+    final isArrears = tenant.status.toLowerCase() == 'overdue';
+    final statusColor = isArrears ? KosmoTheme.error : (tenant.status.toLowerCase() == 'active' ? KosmoTheme.primary : KosmoTheme.textSecondary);
+    final statusBgColor = isArrears ? KosmoTheme.error.withValues(alpha: 0.1) : (tenant.status.toLowerCase() == 'active' ? KosmoTheme.primary.withValues(alpha: 0.1) : KosmoTheme.textSecondary.withValues(alpha: 0.1));
 
     return Scaffold(
-      backgroundColor: KosmoTheme.background,
       appBar: AppBar(
         title: const Text('Detail Penghuni'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined, color: KosmoTheme.primary),
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.tenantForm),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.tenantForm, arguments: {'kosId': tenant.kosId, 'tenant': tenant}),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: KosmoTheme.error),
@@ -70,24 +83,24 @@ class TenantDetailView extends StatelessWidget {
                   CircleAvatar(
                     radius: 40,
                     backgroundColor: KosmoTheme.primary.withValues(alpha: 0.1),
-                    child: const Text(
-                      'A',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 32, fontWeight: FontWeight.bold, color: KosmoTheme.primary),
+                    child: Text(
+                      tenant.name.isNotEmpty ? tenant.name[0].toUpperCase() : 'P',
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 32, fontWeight: FontWeight.bold, color: KosmoTheme.primary),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    tenantName,
-                    style: TextStyle(
+                  Text(
+                    tenant.name,
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    roomNumber,
-                    style: TextStyle(
+                  Text(
+                    'Kamar ${tenant.roomId}',
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
                       color: KosmoTheme.primary,
@@ -98,14 +111,14 @@ class TenantDetailView extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
-                      color: KosmoTheme.primary.withValues(alpha: 0.1),
+                      color: statusBgColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      'Status: Aktif',
+                    child: Text(
+                      'Status: ${tenant.status.toUpperCase()}',
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        color: KosmoTheme.primary,
+                        color: statusColor,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
@@ -132,11 +145,11 @@ class TenantDetailView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildInfoRow(Icons.badge_outlined, 'No. KTP', '3171234567890001'),
+                  _buildInfoRow(Icons.badge_outlined, 'No. KTP', tenant.idCardNumber ?? '-'),
                   const Divider(height: 24),
-                  _buildInfoRow(Icons.phone_outlined, 'No. WhatsApp', phone),
+                  _buildInfoRow(Icons.phone_outlined, 'No. WhatsApp', tenant.phone),
                   const Divider(height: 24),
-                  _buildInfoRow(Icons.email_outlined, 'Email', email),
+                  _buildInfoRow(Icons.email_outlined, 'Email', tenant.email ?? '-'),
                 ],
               ),
             ),
@@ -158,9 +171,9 @@ class TenantDetailView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildInfoRow(Icons.calendar_today_outlined, 'Tanggal Masuk', '1 Jan 2026'),
+                  _buildInfoRow(Icons.calendar_today_outlined, 'Tanggal Masuk', DateFormat('d MMM yyyy').format(tenant.startDate)),
                   const Divider(height: 24),
-                  _buildInfoRow(Icons.event_available_outlined, 'Jatuh Tempo Berikutnya', '1 Sep 2026'),
+                  _buildInfoRow(Icons.event_available_outlined, 'Jatuh Tempo Berikutnya', tenant.endDate != null ? DateFormat('d MMM yyyy').format(tenant.endDate!) : '-'),
                 ],
               ),
             ),
@@ -170,10 +183,10 @@ class TenantDetailView extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => WhatsappService.sendReminder(
-                      phone: phone,
-                      tenantName: tenantName,
-                      month: 'Agustus 2026',
-                      amount: '1.500.000',
+                      phone: tenant.phone,
+                      tenantName: tenant.name,
+                      month: '',
+                      amount: '',
                     ),
                     icon: const Icon(Icons.message_rounded, color: KosmoTheme.success),
                     label: const Text(
@@ -191,11 +204,11 @@ class TenantDetailView extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => WhatsappService.sendEmail(
-                      email: email,
-                      tenantName: tenantName,
-                      month: 'Agustus 2026',
-                      amount: '1.500.000',
-                      ownerName: 'Owner Kosmo',
+                      email: tenant.email ?? '',
+                      tenantName: tenant.name,
+                      month: '',
+                      amount: '',
+                      ownerName: '',
                     ),
                     icon: const Icon(Icons.email_rounded, color: KosmoTheme.secondary),
                     label: const Text(

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
+import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/providers/auth_provider.dart';
 import 'package:kosmo/components/kosmo_text_field.dart';
 import 'package:kosmo/components/kosmo_button.dart';
 import 'package:kosmo/components/kosmo_dialog.dart';
-import 'package:kosmo/views/auth/verify_otp_view.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -37,12 +37,7 @@ class _RegisterViewState extends State<RegisterView> {
     final auth = context.read<AuthProvider>();
     final success = await auth.register(email, _passwordController.text, _nameController.text.trim());
     if (success && mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => VerifyOtpView(email: email),
-        ),
-      );
+      Navigator.pushNamed(context, AppRoutes.verifyOtp, arguments: email);
     } else if (auth.error != null && mounted) {
       KosmoDialog.showError(
         context: context,
@@ -55,7 +50,6 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KosmoTheme.background,
       appBar: AppBar(title: const Text('Daftar Akun Kosmo')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),

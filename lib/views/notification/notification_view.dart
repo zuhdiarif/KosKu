@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/components/kosmo_app_bar.dart';
 import 'package:kosmo/components/kosmo_button.dart';
+import 'package:kosmo/components/kosmo_empty_state.dart';
+import 'package:kosmo/providers/notification_provider.dart';
+import 'package:kosmo/providers/auth_provider.dart';
+import 'package:intl/intl.dart';
 
-class NotificationView extends StatelessWidget {
+class NotificationView extends StatefulWidget {
   const NotificationView({super.key});
+
+  @override
+  State<NotificationView> createState() => _NotificationViewState();
+}
+
+class _NotificationViewState extends State<NotificationView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthProvider>().user;
+      if (user != null) {
+        context.read<NotificationProvider>().loadByOwnerId(user.id);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +35,6 @@ class NotificationView extends StatelessWidget {
         appBar: const KosmoAppBar(
           title: 'Log & Template Pengingat',
         ),
-        backgroundColor: KosmoTheme.background,
         body: Column(
           children: [
             Material(
@@ -45,15 +65,31 @@ class NotificationView extends StatelessWidget {
   }
 
   Widget _buildHistoryTab() {
+    final provider = context.watch<NotificationProvider>();
+
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (provider.notificationList.isEmpty) {
+      return const KosmoEmptyState(
+        icon: Icons.notifications_off_outlined,
+        title: 'Tidak Ada Riwayat',
+        subtitle: 'Riwayat notifikasi akan muncul di sini',
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: 5,
+      itemCount: provider.notificationList.length,
       itemBuilder: (context, index) {
-        final isWa = index % 2 == 0;
+        final notification = provider.notificationList[index];
+        final isWa = notification.sentVia == 'whatsapp';
 
         return Card(
           elevation: 2,
           margin: const EdgeInsets.only(bottom: 12),
+          color: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -63,9 +99,9 @@ class NotificationView extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Pengingat Pembayaran',
-                      style: TextStyle(
+                    Text(
+                      notification.type == 'payment_reminder' ? 'Pengingat Pembayaran' : 'Notifikasi',
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
@@ -74,16 +110,18 @@ class NotificationView extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: KosmoTheme.primary.withValues(alpha: 0.1),
+                        color: notification.isSent 
+                            ? KosmoTheme.primary.withValues(alpha: 0.1)
+                            : KosmoTheme.warning.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
-                        'Terkirim',
+                      child: Text(
+                        notification.isSent ? 'Terkirim' : 'Pending',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: KosmoTheme.primary,
+                          color: notification.isSent ? KosmoTheme.primary : KosmoTheme.warning,
                         ),
                       ),
                     ),
@@ -91,7 +129,7 @@ class NotificationView extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Halo Penghuni ${index + 1}, tagihan kos kamar ${101 + index} sebesar Rp 1.500.000 jatuh tempo pada ${15 + index} Agustus 2026.',
+                  notification.message,
                   style: const TextStyle(fontFamily: 'Poppins', fontSize: 13, color: KosmoTheme.textSecondary),
                 ),
                 const SizedBox(height: 12),
@@ -118,7 +156,7 @@ class NotificationView extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      '07 Ags 2026, 0${9 + index}:00',
+                      DateFormat('dd MMM yyyy, HH:mm').format(notification.createdAt),
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 11,

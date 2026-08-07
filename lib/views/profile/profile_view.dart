@@ -8,9 +8,9 @@ import 'package:kosmo/components/kosmo_button.dart';
 import 'package:kosmo/components/kosmo_dialog.dart';
 import 'package:kosmo/providers/auth_provider.dart';
 import 'package:kosmo/providers/theme_provider.dart';
+import 'package:kosmo/providers/kos_provider.dart';
+import 'package:kosmo/providers/payment_provider.dart';
 import 'package:kosmo/services/report_service.dart';
-import 'package:kosmo/models/kos_model.dart';
-import 'package:kosmo/models/payment_model.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -31,39 +31,17 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   void _exportPdfReport() async {
-    final dummyKos = KosModel(
-      id: '1',
-      ownerId: '1',
-      name: 'Kosmo Mawar Premium',
-      address: 'Jl. Mawar No. 12, Jakarta',
-      totalRooms: 20,
-      createdAt: DateTime.now(),
-    );
+    final kosList = context.read<KosProvider>().kosList;
+    final paymentList = context.read<PaymentProvider>().paymentList;
 
-    final dummyPayments = [
-      PaymentModel(
-        id: 'pay-001',
-        tenantId: 't-1',
-        roomId: 'r-1',
-        amount: 1500000,
-        dueDate: DateTime.now(),
-        status: 'paid',
-        createdAt: DateTime.now(),
-      ),
-      PaymentModel(
-        id: 'pay-002',
-        tenantId: 't-2',
-        roomId: 'r-2',
-        amount: 1500000,
-        dueDate: DateTime.now().add(const Duration(days: 5)),
-        status: 'pending',
-        createdAt: DateTime.now(),
-      ),
-    ];
+    if (kosList.isEmpty) {
+      KosmoDialog.showError(context: context, title: 'Kosong', message: 'Anda belum memiliki properti kos');
+      return;
+    }
 
     await ReportService.generatePaymentReportPdf(
-      kos: dummyKos,
-      payments: dummyPayments,
+      kos: kosList.first, // Usually export for first kos or add selector later
+      payments: paymentList,
     );
   }
 
@@ -122,14 +100,6 @@ class _ProfileViewState extends State<ProfileView> {
             const SizedBox(height: 4),
             Text(
               user?.email ?? 'owner@kosmo.com',
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                color: KosmoTheme.textSecondary,
-              ),
-            ),
-            Text(
-              user?.phone ?? '+62 812 3456 7890',
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,

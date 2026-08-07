@@ -18,7 +18,7 @@ class KosmoApp extends StatelessWidget {
       darkTheme: KosmoTheme.darkTheme,
       themeMode: themeProvider.themeMode,
       initialRoute: AppRoutes.login,
-      routes: AppRoutes.routes,
+      onGenerateRoute: AppRoutes.onGenerateRoute,
     );
   }
 }

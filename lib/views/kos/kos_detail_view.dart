@@ -1,38 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:kosmo/providers/kos_provider.dart';
+import 'package:kosmo/models/kos_model.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/components/kosmo_dialog.dart';
+import 'package:kosmo/components/kosmo_button.dart';
 
 class KosDetailView extends StatelessWidget {
-  const KosDetailView({super.key});
+  final KosModel kos;
+  
+  const KosDetailView({super.key, required this.kos});
 
   void _handleDelete(BuildContext context) async {
     final confirm = await KosmoDialog.showConfirm(
       context: context,
       title: 'Hapus Kos',
-      message: 'Apakah Anda yakin ingin menghapus properti Kos Mawar? Seluruh data kamar & penghuni di dalamnya akan terhapus.',
+      message: 'Apakah Anda yakin ingin menghapus properti ${kos.name}? Seluruh data kamar & penghuni di dalamnya akan terhapus.',
       confirmLabel: 'Ya, Hapus',
       isDangerous: true,
     );
 
     if (confirm && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Data kos berhasil dihapus.')),
-      );
-      Navigator.pop(context);
+      final success = await context.read<KosProvider>().delete(kos.id);
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Data kos berhasil dihapus.')),
+        );
+        Navigator.pop(context);
+      } else if (context.mounted) {
+        final error = context.read<KosProvider>().error ?? 'Terjadi kesalahan saat menghapus.';
+        KosmoDialog.showError(context: context, title: 'Gagal Menghapus', message: error);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KosmoTheme.background,
       appBar: AppBar(
-        title: const Text('Detail Kosmo Mawar'),
+        title: Text('Detail ${kos.name}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined, color: KosmoTheme.primary),
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.kosForm),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.kosForm, arguments: kos),
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline, color: KosmoTheme.error),
@@ -63,7 +74,7 @@ class KosDetailView extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -76,14 +87,14 @@ class KosDetailView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.location_on, color: KosmoTheme.textSecondary, size: 20),
-                      SizedBox(width: 8),
+                      const Icon(Icons.location_on, color: KosmoTheme.textSecondary, size: 20),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Jl. Sudirman No. 12, Jakarta',
-                          style: TextStyle(
+                          kos.address,
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             color: KosmoTheme.textPrimary,
                             fontSize: 14,
@@ -92,81 +103,32 @@ class KosDetailView extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (kos.description != null && kos.description!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      kos.description!,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        color: KosmoTheme.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildInfoItem('Total Kamar', '15'),
-                      _buildInfoItem('Terisi', '12'),
-                      _buildInfoItem('Kosong', '3'),
+                      _buildInfoItem('Total Kamar', '${kos.totalRooms}'),
                     ],
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Daftar Kamar',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: KosmoTheme.textPrimary,
-                  ),
-                ),
-                TextButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamed(context, AppRoutes.roomForm);
-                  },
-                  icon: const Icon(Icons.add, color: KosmoTheme.primary, size: 20),
-                  label: const Text(
-                    'Tambah Kamar',
-                    style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.primary, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: ListTile(
-                    title: Text(
-                      'Kamar ${101 + index}',
-                      style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-                    ),
-                    subtitle: const Text(
-                      'Rp 1.500.000 / bulan',
-                      style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: KosmoTheme.textSecondary),
-                    ),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: index == 0 ? KosmoTheme.errorContainer : KosmoTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        index == 0 ? 'Terisi' : 'Tersedia',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: index == 0 ? KosmoTheme.error : KosmoTheme.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
+            KosmoButton(
+              label: 'Lihat Daftar Kamar',
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.roomList, arguments: kos.id);
               },
             ),
           ],
