@@ -103,7 +103,7 @@ class _PaymentListViewState extends State<PaymentListView> {
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 12,
-                        color: isSelected ? Colors.white : KosmoTheme.textPrimary,
+                        color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     selected: isSelected,

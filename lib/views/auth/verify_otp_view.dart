@@ -56,7 +56,6 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
                 fontFamily: 'Poppins',
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: KosmoTheme.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),

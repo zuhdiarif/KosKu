@@ -77,7 +77,6 @@ class _LoginViewState extends State<LoginView> {
                   fontFamily: 'Poppins',
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: KosmoTheme.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),

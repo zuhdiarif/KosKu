@@ -88,7 +88,6 @@ class _DashboardViewState extends State<DashboardView> {
                     fontFamily: 'Poppins',
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: KosmoTheme.textPrimary,
                   ),
                 ),
               ],
@@ -212,7 +211,6 @@ class _DashboardViewState extends State<DashboardView> {
                                 '$totalProperties Kos',
                                 style: const TextStyle(
                                   fontFamily: 'Poppins',
-                                  color: KosmoTheme.textPrimary,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -251,7 +249,6 @@ class _DashboardViewState extends State<DashboardView> {
                           fontFamily: 'Poppins',
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: KosmoTheme.textPrimary,
                         ),
                       ),
                       TextButton(
@@ -344,7 +341,6 @@ class _DashboardViewState extends State<DashboardView> {
                   style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
-                    color: KosmoTheme.textPrimary,
                   ),
                 ),
                 Text(

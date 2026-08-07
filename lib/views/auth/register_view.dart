@@ -66,7 +66,6 @@ class _RegisterViewState extends State<RegisterView> {
                   fontFamily: 'Poppins',
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: KosmoTheme.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),

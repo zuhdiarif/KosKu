@@ -96,7 +96,6 @@ class KosDetailView extends StatelessWidget {
                           kos.address,
                           style: const TextStyle(
                             fontFamily: 'Poppins',
-                            color: KosmoTheme.textPrimary,
                             fontSize: 14,
                           ),
                         ),
@@ -146,7 +145,6 @@ class KosDetailView extends StatelessWidget {
             fontFamily: 'Poppins',
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: KosmoTheme.textPrimary,
           ),
         ),
         Text(

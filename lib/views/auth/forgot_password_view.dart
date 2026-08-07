@@ -62,7 +62,6 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                   fontFamily: 'Poppins',
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: KosmoTheme.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),

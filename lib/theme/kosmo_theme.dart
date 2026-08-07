@@ -14,6 +14,8 @@ class KosmoTheme {
   static const Color onErrorContainer = Color(0xFF93000A);
   static const Color textPrimary = Color(0xFF191C1D);
   static const Color textSecondary = Color(0xFF6F7973);
+  static const Color darkTextPrimary = Color(0xFFF0F4F1);
+  static const Color darkTextSecondary = Color(0xFFA1ACA5);
   static const Color success = Color(0xFF2ECC71);
   static const Color warning = Color(0xFFF39C12);
 
@@ -35,6 +37,12 @@ class KosmoTheme {
         elevation: 0,
         centerTitle: false,
         foregroundColor: textPrimary,
+      ),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(fontFamily: 'Poppins', color: textPrimary),
+        bodyMedium: TextStyle(fontFamily: 'Poppins', color: textSecondary),
+        titleLarge: TextStyle(fontFamily: 'Poppins', color: textPrimary, fontWeight: FontWeight.bold),
+        titleMedium: TextStyle(fontFamily: 'Poppins', color: textPrimary, fontWeight: FontWeight.w600),
       ),
       cardTheme: CardThemeData(
         elevation: 2,
@@ -95,6 +103,12 @@ class KosmoTheme {
         elevation: 0,
         centerTitle: false,
         foregroundColor: Colors.white,
+      ),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(fontFamily: 'Poppins', color: darkTextPrimary),
+        bodyMedium: TextStyle(fontFamily: 'Poppins', color: darkTextSecondary),
+        titleLarge: TextStyle(fontFamily: 'Poppins', color: darkTextPrimary, fontWeight: FontWeight.bold),
+        titleMedium: TextStyle(fontFamily: 'Poppins', color: darkTextPrimary, fontWeight: FontWeight.w600),
       ),
       cardTheme: CardThemeData(
         elevation: 2,
