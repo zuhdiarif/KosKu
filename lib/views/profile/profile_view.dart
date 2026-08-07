@@ -7,6 +7,7 @@ import 'package:kosmo/components/kosmo_bottom_nav.dart';
 import 'package:kosmo/components/kosmo_button.dart';
 import 'package:kosmo/components/kosmo_dialog.dart';
 import 'package:kosmo/providers/auth_provider.dart';
+import 'package:kosmo/providers/theme_provider.dart';
 import 'package:kosmo/services/report_service.dart';
 import 'package:kosmo/models/kos_model.dart';
 import 'package:kosmo/models/payment_model.dart';
@@ -19,8 +20,6 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  bool _isDarkMode = false;
-
   void _onNavTap(int index) {
     if (index == 0) {
       Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
@@ -88,10 +87,10 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final themeProvider = context.watch<ThemeProvider>();
 
     return Scaffold(
       appBar: const KosmoAppBar(title: 'Profil Saya'),
-      backgroundColor: KosmoTheme.background,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -141,7 +140,7 @@ class _ProfileViewState extends State<ProfileView> {
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -177,12 +176,10 @@ class _ProfileViewState extends State<ProfileView> {
                   SwitchListTile(
                     secondary: const Icon(Icons.dark_mode, color: KosmoTheme.primary),
                     title: const Text('Mode Gelap', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
-                    value: _isDarkMode,
+                    value: themeProvider.isDarkMode,
                     activeThumbColor: KosmoTheme.primary,
                     onChanged: (value) {
-                      setState(() {
-                        _isDarkMode = value;
-                      });
+                      context.read<ThemeProvider>().toggleTheme(value);
                     },
                   ),
                 ],

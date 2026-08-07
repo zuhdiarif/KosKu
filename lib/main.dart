@@ -9,6 +9,7 @@ import 'package:kosmo/providers/room_provider.dart';
 import 'package:kosmo/providers/tenant_provider.dart';
 import 'package:kosmo/providers/payment_provider.dart';
 import 'package:kosmo/providers/notification_provider.dart';
+import 'package:kosmo/providers/theme_provider.dart';
 import 'package:kosmo/services/database/kosmo_database.dart';
 import 'package:kosmo/services/local_db_service.dart';
 import 'package:kosmo/services/sync_service.dart';
@@ -29,6 +30,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => KosProvider()),
         ChangeNotifierProvider(create: (_) => RoomProvider()),
