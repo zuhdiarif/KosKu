@@ -5,6 +5,7 @@ import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/components/kosmo_app_bar.dart';
 import 'package:kosmo/components/kosmo_text_field.dart';
 import 'package:kosmo/components/kosmo_empty_state.dart';
+import 'package:kosmo/components/kosmo_bottom_nav.dart';
 import 'package:kosmo/services/whatsapp_service.dart';
 import 'package:kosmo/models/tenant_model.dart';
 import 'package:kosmo/providers/tenant_provider.dart';
@@ -12,7 +13,7 @@ import 'package:kosmo/providers/tenant_provider.dart';
 class TenantListView extends StatefulWidget {
   final String kosId;
 
-  const TenantListView({super.key, required this.kosId});
+  const TenantListView({super.key, this.kosId = ''});
 
   @override
   State<TenantListView> createState() => _TenantListViewState();
@@ -26,7 +27,11 @@ class _TenantListViewState extends State<TenantListView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<TenantProvider>().loadByKosId(widget.kosId);
+      if (widget.kosId.isNotEmpty) {
+        context.read<TenantProvider>().loadByKosId(widget.kosId);
+      } else {
+        context.read<TenantProvider>().loadAll();
+      }
     });
     _searchController.addListener(() {
       setState(() {
@@ -42,7 +47,29 @@ class _TenantListViewState extends State<TenantListView> {
   }
 
   Future<void> _refreshData() async {
-    await context.read<TenantProvider>().loadByKosId(widget.kosId);
+    if (widget.kosId.isNotEmpty) {
+      await context.read<TenantProvider>().loadByKosId(widget.kosId);
+    } else {
+      await context.read<TenantProvider>().loadAll();
+    }
+  }
+
+  void _onNavTap(int index) {
+    if (index == 2) return;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, AppRoutes.kosList);
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, AppRoutes.paymentList);
+        break;
+      case 4:
+        Navigator.pushReplacementNamed(context, AppRoutes.profile);
+        break;
+    }
   }
 
   @override
@@ -55,7 +82,10 @@ class _TenantListViewState extends State<TenantListView> {
     }).toList();
 
     return Scaffold(
-      appBar: const KosmoAppBar(title: 'Daftar Penghuni'),
+      appBar: KosmoAppBar(
+        title: 'Daftar Penghuni',
+        showBack: widget.kosId.isNotEmpty,
+      ),
       body: Column(
         children: [
           Padding(
@@ -77,6 +107,10 @@ class _TenantListViewState extends State<TenantListView> {
         },
         backgroundColor: KosmoTheme.primary,
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+      bottomNavigationBar: KosmoBottomNav(
+        currentIndex: 2,
+        onTap: _onNavTap,
       ),
     );
   }
@@ -100,7 +134,7 @@ class _TenantListViewState extends State<TenantListView> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => provider.loadByKosId(widget.kosId),
+              onPressed: _refreshData,
               style: ElevatedButton.styleFrom(backgroundColor: KosmoTheme.primary),
               child: const Text('Coba Lagi', style: TextStyle(color: Colors.white, fontFamily: 'Poppins')),
             ),
@@ -133,6 +167,7 @@ class _TenantListViewState extends State<TenantListView> {
             onTap: () {
               Navigator.pushNamed(context, AppRoutes.tenantDetail, arguments: tenant);
             },
+            borderRadius: BorderRadius.circular(16),
             child: Card(
               margin: const EdgeInsets.only(bottom: 12),
               color: Theme.of(context).cardColor,
@@ -198,12 +233,13 @@ class _TenantListViewState extends State<TenantListView> {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 8),
                         IconButton(
                           onPressed: () => WhatsappService.sendReminder(
                             phone: tenant.phone,
                             tenantName: tenant.name,
-                            month: '',
-                            amount: '',
+                            month: 'Bulan Ini',
+                            amount: 'Sewa Kos',
                           ),
                           icon: const Icon(Icons.message_rounded, color: KosmoTheme.success, size: 20),
                           padding: EdgeInsets.zero,

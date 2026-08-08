@@ -4,6 +4,11 @@ import 'package:kosmo/models/tenant_model.dart';
 class TenantService {
   final SupabaseClient _client = Supabase.instance.client;
 
+  Future<List<TenantModel>> getAll() async {
+    final data = await _client.from('tenants').select().order('created_at');
+    return data.map((e) => TenantModel.fromJson(e)).toList();
+  }
+
   Future<List<TenantModel>> getByKosId(String kosId) async {
     final data = await _client.from('tenants').select().eq('kos_id', kosId).order('created_at');
     return data.map((e) => TenantModel.fromJson(e)).toList();

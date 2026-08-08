@@ -12,7 +12,24 @@ class TenantProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  Future<void> loadAll() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _tenantList = await _service.getAll();
+      _error = null;
+    } catch (e) {
+      _error = e.toString();
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> loadByKosId(String kosId) async {
+    if (kosId.isEmpty) {
+      return loadAll();
+    }
     _isLoading = true;
     _error = null;
     notifyListeners();

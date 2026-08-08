@@ -21,12 +21,20 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   void _onNavTap(int index) {
-    if (index == 0) {
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-    } else if (index == 1) {
-      Navigator.pushReplacementNamed(context, AppRoutes.kosList);
-    } else if (index == 2) {
-      Navigator.pushReplacementNamed(context, AppRoutes.paymentList);
+    if (index == 4) return;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, AppRoutes.kosList);
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, AppRoutes.tenantList);
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, AppRoutes.paymentList);
+        break;
     }
   }
 
@@ -169,7 +177,7 @@ class _ProfileViewState extends State<ProfileView> {
         ),
       ),
       bottomNavigationBar: KosmoBottomNav(
-        currentIndex: 3,
+        currentIndex: 4,
         onTap: _onNavTap,
       ),
     );

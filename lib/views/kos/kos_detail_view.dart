@@ -126,8 +126,18 @@ class KosDetailView extends StatelessWidget {
             const SizedBox(height: 24),
             KosmoButton(
               label: 'Lihat Daftar Kamar',
+              icon: Icons.meeting_room_rounded,
               onPressed: () {
                 Navigator.pushNamed(context, AppRoutes.roomList, arguments: kos.id);
+              },
+            ),
+            const SizedBox(height: 12),
+            KosmoButton(
+              label: 'Lihat Daftar Penghuni',
+              variant: KosmoButtonVariant.outline,
+              icon: Icons.people_alt_rounded,
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.tenantList, arguments: kos.id);
               },
             ),
           ],

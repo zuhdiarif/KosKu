@@ -43,12 +43,20 @@ class _PaymentListViewState extends State<PaymentListView> {
   }
 
   void _onNavTap(int index) {
-    if (index == 0) {
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-    } else if (index == 1) {
-      Navigator.pushReplacementNamed(context, AppRoutes.kosList);
-    } else if (index == 3) {
-      Navigator.pushReplacementNamed(context, AppRoutes.profile);
+    if (index == 3) return;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, AppRoutes.kosList);
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, AppRoutes.tenantList);
+        break;
+      case 4:
+        Navigator.pushReplacementNamed(context, AppRoutes.profile);
+        break;
     }
   }
 
@@ -165,7 +173,7 @@ class _PaymentListViewState extends State<PaymentListView> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       bottomNavigationBar: KosmoBottomNav(
-        currentIndex: 2,
+        currentIndex: 3,
         onTap: _onNavTap,
       ),
     );

@@ -38,12 +38,20 @@ class _KosListViewState extends State<KosListView> {
   }
 
   void _onNavTap(BuildContext context, int index) {
-    if (index == 0) {
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-    } else if (index == 2) {
-      Navigator.pushReplacementNamed(context, AppRoutes.paymentList);
-    } else if (index == 3) {
-      Navigator.pushReplacementNamed(context, AppRoutes.profile);
+    if (index == 1) return;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, AppRoutes.tenantList);
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, AppRoutes.paymentList);
+        break;
+      case 4:
+        Navigator.pushReplacementNamed(context, AppRoutes.profile);
+        break;
     }
   }
 

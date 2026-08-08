@@ -30,12 +30,20 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   void _onNavTap(BuildContext context, int index) {
-    if (index == 1) {
-      Navigator.pushReplacementNamed(context, AppRoutes.kosList);
-    } else if (index == 2) {
-      Navigator.pushReplacementNamed(context, AppRoutes.paymentList);
-    } else if (index == 3) {
-      Navigator.pushReplacementNamed(context, AppRoutes.profile);
+    if (index == 0) return;
+    switch (index) {
+      case 1:
+        Navigator.pushReplacementNamed(context, AppRoutes.kosList);
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, AppRoutes.tenantList);
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, AppRoutes.paymentList);
+        break;
+      case 4:
+        Navigator.pushReplacementNamed(context, AppRoutes.profile);
+        break;
     }
   }
 
@@ -179,65 +187,94 @@ class _DashboardViewState extends State<DashboardView> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Properti Anda',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  color: KosmoTheme.textSecondary,
-                                  fontSize: 14,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => Navigator.pushNamed(context, AppRoutes.kosList),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '$totalProperties Kos',
-                                style: const TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: KosmoTheme.primary.withValues(alpha: 0.1),
+                                  child: const Icon(Icons.home_work_rounded, color: KosmoTheme.primary),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 12),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Kos',
+                                      style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary, fontSize: 12),
+                                    ),
+                                    Text(
+                                      '$totalProperties Unit',
+                                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(
-                          height: 60,
-                          width: 60,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              CircularProgressIndicator(
-                                value: 1.0,
-                                backgroundColor: Color(0xFFF3F4F6),
-                                valueColor: AlwaysStoppedAnimation<Color>(KosmoTheme.primary),
-                                strokeWidth: 8,
-                              ),
-                              Center(
-                                child: Icon(Icons.home_work, color: KosmoTheme.primary),
-                              ),
-                            ],
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => Navigator.pushNamed(context, AppRoutes.tenantList),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: KosmoTheme.secondary.withValues(alpha: 0.1),
+                                  child: const Icon(Icons.people_rounded, color: KosmoTheme.secondary),
+                                ),
+                                const SizedBox(width: 12),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Penghuni',
+                                      style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary, fontSize: 12),
+                                    ),
+                                    Text(
+                                      '${tenantProvider.tenantList.length} Orang',
+                                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   Row(
