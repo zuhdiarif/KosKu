@@ -95,6 +95,9 @@ class _KosFormViewState extends State<KosFormView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
+
     return Scaffold(
       appBar: KosmoAppBar(title: widget.kos == null ? 'Tambah Kos' : 'Edit Kos'),
       body: SingleChildScrollView(
@@ -105,22 +108,22 @@ class _KosFormViewState extends State<KosFormView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  height: 160,
+                  height: 140,
                   width: double.infinity,
                   color: KosmoTheme.primary.withValues(alpha: 0.08),
-                  child: const Column(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add_a_photo_outlined, size: 40, color: KosmoTheme.primary),
-                      SizedBox(height: 8),
+                      Icon(Icons.add_a_photo_outlined, size: 36, color: primaryAccent),
+                      const SizedBox(height: 8),
                       Text(
                         'Upload Foto Kosmo',
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          color: KosmoTheme.primary,
-                          fontWeight: FontWeight.w600,
+                          color: primaryAccent,
+                          fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
                       ),
@@ -128,53 +131,74 @@ class _KosFormViewState extends State<KosFormView> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-              KosmoTextField(
-                controller: _nameController,
-                label: 'Nama Kos',
-                prefixIcon: Icons.apartment_rounded,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Nama kos wajib diisi';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              KosmoTextField(
-                controller: _addressController,
-                label: 'Alamat Lengkap',
-                prefixIcon: Icons.location_on_outlined,
-                maxLines: 2,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Alamat wajib diisi';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              KosmoTextField(
-                controller: _descController,
-                label: 'Deskripsi & Fasilitas Umum',
-                prefixIcon: Icons.description_outlined,
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              KosmoTextField(
-                controller: _roomsController,
-                label: 'Total Kamar',
-                prefixIcon: Icons.meeting_room_outlined,
-                keyboardType: TextInputType.number,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Jumlah kamar wajib diisi';
-                  if (int.tryParse(val.trim()) == null) return 'Masukkan angka yang valid';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 32),
-              _isSaving
-                  ? const Center(child: CircularProgressIndicator(color: KosmoTheme.primary))
-                  : KosmoButton(
-                      label: 'Simpan Data Kos',
-                      onPressed: _save,
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    KosmoTextField(
+                      controller: _nameController,
+                      label: 'Nama Kos',
+                      prefixIcon: Icons.apartment_rounded,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Nama kos wajib diisi';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    KosmoTextField(
+                      controller: _addressController,
+                      label: 'Alamat Lengkap',
+                      prefixIcon: Icons.location_on_outlined,
+                      maxLines: 2,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Alamat wajib diisi';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    KosmoTextField(
+                      controller: _descController,
+                      label: 'Deskripsi & Fasilitas Umum',
+                      prefixIcon: Icons.description_outlined,
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 16),
+                    KosmoTextField(
+                      controller: _roomsController,
+                      label: 'Total Kamar',
+                      prefixIcon: Icons.meeting_room_outlined,
+                      keyboardType: TextInputType.number,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Jumlah kamar wajib diisi';
+                        if (int.tryParse(val.trim()) == null) return 'Masukkan angka yang valid';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    _isSaving
+                        ? const Center(child: CircularProgressIndicator())
+                        : KosmoButton(
+                            label: 'Simpan Data Kos',
+                            onPressed: _save,
+                          ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

@@ -48,7 +48,7 @@ class _ProfileViewState extends State<ProfileView> {
     }
 
     await ReportService.generatePaymentReportPdf(
-      kos: kosList.first, // Usually export for first kos or add selector later
+      kos: kosList.first,
       payments: paymentList,
     );
   }
@@ -72,90 +72,96 @@ class _ProfileViewState extends State<ProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
+
     final user = context.watch<AuthProvider>().user;
     final themeProvider = context.watch<ThemeProvider>();
 
     return Scaffold(
-      appBar: const KosmoAppBar(title: 'Profil Saya'),
+      appBar: const KosmoAppBar(title: 'Profil Saya', showBack: false),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Center(
               child: CircleAvatar(
-                radius: 50,
+                radius: 46,
                 backgroundColor: KosmoTheme.primary.withValues(alpha: 0.1),
                 child: Text(
                   user?.fullName.isNotEmpty == true ? user!.fullName[0].toUpperCase() : 'O',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                    color: KosmoTheme.primary,
-                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: primaryAccent,
+                    fontSize: 36,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               user?.fullName ?? 'Owner Kosmo',
               style: const TextStyle(
                 fontFamily: 'Poppins',
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               user?.email ?? 'owner@kosmo.com',
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
-                color: KosmoTheme.textSecondary,
+                color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.picture_as_pdf_rounded, color: KosmoTheme.primary),
-                    title: const Text('Export Laporan Keuangan (PDF)', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
+                    leading: Icon(Icons.picture_as_pdf_rounded, color: primaryAccent),
+                    title: const Text('Export Laporan Keuangan (PDF)', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _exportPdfReport,
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    leading: const Icon(Icons.message, color: KosmoTheme.primary),
-                    title: const Text('Template Pesan WhatsApp', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
+                    leading: Icon(Icons.message_rounded, color: primaryAccent),
+                    title: const Text('Template Pesan WhatsApp', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.pushNamed(context, AppRoutes.notifications),
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    leading: const Icon(Icons.email, color: KosmoTheme.primary),
-                    title: const Text('Template Pesan Email', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
+                    leading: Icon(Icons.email_rounded, color: primaryAccent),
+                    title: const Text('Template Pesan Email', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600)),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Navigator.pushNamed(context, AppRoutes.notifications),
                   ),
                   const Divider(height: 1),
                   SwitchListTile(
-                    secondary: const Icon(Icons.dark_mode, color: KosmoTheme.primary),
-                    title: const Text('Mode Gelap', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
+                    secondary: Icon(Icons.dark_mode_rounded, color: primaryAccent),
+                    title: const Text('Mode Gelap', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600)),
                     value: themeProvider.isDarkMode,
-                    activeThumbColor: KosmoTheme.primary,
+                    activeThumbColor: primaryAccent,
                     onChanged: (value) {
                       context.read<ThemeProvider>().toggleTheme(value);
                     },
@@ -163,9 +169,9 @@ class _ProfileViewState extends State<ProfileView> {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 28),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: KosmoButton(
                 label: 'Keluar',
                 variant: KosmoButtonVariant.outline,

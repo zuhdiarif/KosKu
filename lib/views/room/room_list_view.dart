@@ -82,6 +82,8 @@ class _RoomListViewState extends State<RoomListView> {
   }
 
   Widget _buildBody(RoomProvider provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (provider.isLoading) {
       return ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -102,7 +104,7 @@ class _RoomListViewState extends State<RoomListView> {
               'Gagal memuat data kamar',
               style: TextStyle(
                 fontFamily: 'Poppins',
-                color: KosmoTheme.textSecondary,
+                color: KosmoTheme.error,
               ),
             ),
             const SizedBox(height: 8),
@@ -164,7 +166,7 @@ class _RoomListViewState extends State<RoomListView> {
         if (room.status == 'occupied') {
           statusLabel = 'Terisi';
           statusColor = KosmoTheme.error;
-          statusBgColor = KosmoTheme.errorContainer;
+          statusBgColor = KosmoTheme.error.withValues(alpha: 0.1);
         } else if (room.status == 'maintenance') {
           statusLabel = 'Maintenance';
           statusColor = KosmoTheme.warning;
@@ -175,86 +177,94 @@ class _RoomListViewState extends State<RoomListView> {
           onTap: () {
             Navigator.pushNamed(context, AppRoutes.roomDetail, arguments: room);
           },
-          child: Card(
-            color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
             margin: const EdgeInsets.only(bottom: 12),
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/images/room_interior.jpg',
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.asset(
+                    'assets/images/room_interior.jpg',
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
                       width: 64,
                       height: 64,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: 64,
-                        height: 64,
-                        color: KosmoTheme.primary.withValues(alpha: 0.1),
-                        child: const Icon(
-                          Icons.meeting_room,
-                          color: KosmoTheme.primary,
-                        ),
+                      color: KosmoTheme.primary.withValues(alpha: 0.1),
+                      child: const Icon(
+                        Icons.meeting_room,
+                        color: KosmoTheme.primary,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Kamar ${room.roomNumber}',
-                              style: const TextStyle(
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Kamar ${room.roomNumber}',
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusBgColor,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                statusLabel,
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: statusColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${room.floor != null ? "Lantai ${room.floor} • " : ""}${formatCurrency.format(room.price)} / bln',
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            color: KosmoTheme.textSecondary,
                           ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusBgColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              statusLabel,
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: statusColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${room.floor != null ? "Lantai ${room.floor} • " : ""}${formatCurrency.format(room.price)} / bln',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -264,6 +274,9 @@ class _RoomListViewState extends State<RoomListView> {
 
   Widget _buildFilterChip(String label, [String? statusValue]) {
     final isSelected = _selectedFilter == label;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -273,12 +286,12 @@ class _RoomListViewState extends State<RoomListView> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? KosmoTheme.primary : Theme.of(context).cardColor,
+          color: isSelected ? primaryAccent : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? KosmoTheme.primary
-                : Colors.grey.withValues(alpha: 0.3),
+                ? primaryAccent
+                : (isDark ? const Color(0xFF333333) : const Color(0xFFE1E3E4)),
           ),
         ),
         child: Text(
@@ -286,8 +299,10 @@ class _RoomListViewState extends State<RoomListView> {
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.white : KosmoTheme.textSecondary,
+            fontWeight: FontWeight.w600,
+            color: isSelected
+                ? (isDark ? Colors.black : Colors.white)
+                : (isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary),
           ),
         ),
       ),

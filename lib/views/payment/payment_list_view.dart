@@ -86,7 +86,7 @@ class _PaymentListViewState extends State<PaymentListView> {
     }
 
     return Scaffold(
-      appBar: const KosmoAppBar(title: 'Riwayat Pembayaran'),
+      appBar: const KosmoAppBar(title: 'Riwayat Pembayaran', showBack: false),
       body: Column(
         children: [
           Padding(
@@ -103,6 +103,8 @@ class _PaymentListViewState extends State<PaymentListView> {
             child: Row(
               children: _filters.map((filter) {
                 final isSelected = _selectedFilter == filter;
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: FilterChip(
@@ -111,7 +113,10 @@ class _PaymentListViewState extends State<PaymentListView> {
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 12,
-                        color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? (isDark ? Colors.black : Colors.white)
+                            : Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     selected: isSelected,
@@ -121,11 +126,13 @@ class _PaymentListViewState extends State<PaymentListView> {
                       });
                     },
                     backgroundColor: Theme.of(context).cardColor,
-                    selectedColor: KosmoTheme.primary,
+                    selectedColor: primaryAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: isSelected ? KosmoTheme.primary : Colors.grey.withValues(alpha: 0.3),
+                        color: isSelected
+                            ? primaryAccent
+                            : (isDark ? const Color(0xFF333333) : const Color(0xFFE1E3E4)),
                       ),
                     ),
                   ),
@@ -180,11 +187,13 @@ class _PaymentListViewState extends State<PaymentListView> {
   }
 
   Widget _buildPaymentCard(PaymentModel payment) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
     final formatCurrency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final isLunas = payment.status == 'paid';
     final isOverdue = payment.status == 'overdue';
 
-    Color statusColor = isLunas ? KosmoTheme.primary : (isOverdue ? KosmoTheme.error : KosmoTheme.warning);
+    Color statusColor = isLunas ? primaryAccent : (isOverdue ? KosmoTheme.error : KosmoTheme.warning);
     String statusText = isLunas ? 'Lunas' : (isOverdue ? 'Nunggak' : 'Pending');
 
     final tenantList = context.read<TenantProvider>().tenantList.where((t) => t.id == payment.tenantId).toList();
@@ -194,14 +203,24 @@ class _PaymentListViewState extends State<PaymentListView> {
 
     return InkWell(
       onTap: () => Navigator.pushNamed(context, AppRoutes.paymentDetail, arguments: payment),
-      borderRadius: BorderRadius.circular(16),
-      child: Card(
-        elevation: 2,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        color: Theme.of(context).cardColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
         padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -213,7 +232,7 @@ class _PaymentListViewState extends State<PaymentListView> {
                     payment.notes?.isNotEmpty == true ? payment.notes! : 'Pembayaran $tenantName',
                     style: const TextStyle(
                       fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                     maxLines: 1,
@@ -222,17 +241,17 @@ class _PaymentListViewState extends State<PaymentListView> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     statusText,
                     style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
                       color: statusColor,
                     ),
                   ),
@@ -242,20 +261,20 @@ class _PaymentListViewState extends State<PaymentListView> {
             const SizedBox(height: 8),
             Text(
               formatCurrency.format(payment.amount),
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Poppins',
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: KosmoTheme.primary,
+                color: primaryAccent,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'Jatuh Tempo: ${DateFormat('dd MMM yyyy').format(payment.dueDate)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 12,
-                color: KosmoTheme.textSecondary,
+                color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
               ),
             ),
             const SizedBox(height: 12),
@@ -296,8 +315,9 @@ class _PaymentListViewState extends State<PaymentListView> {
                     backgroundColor: KosmoTheme.success,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(80, 36),
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
@@ -306,7 +326,6 @@ class _PaymentListViewState extends State<PaymentListView> {
           ],
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

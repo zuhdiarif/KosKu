@@ -66,7 +66,7 @@ class _KosListViewState extends State<KosListView> {
     }).toList();
 
     return Scaffold(
-      appBar: const KosmoAppBar(title: 'Daftar Kos'),
+      appBar: const KosmoAppBar(title: 'Daftar Kos', showBack: false),
       body: Column(
         children: [
           Padding(
@@ -98,6 +98,9 @@ class _KosListViewState extends State<KosListView> {
   }
 
   Widget _buildContent(KosProvider kosProvider, List<KosModel> filteredList) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
+
     if (kosProvider.isLoading && kosProvider.kosList.isEmpty) {
       return ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -154,15 +157,19 @@ class _KosListViewState extends State<KosListView> {
             onTap: () {
               Navigator.pushNamed(context, AppRoutes.kosDetail, arguments: kos);
             },
+            borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                    blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -170,7 +177,7 @@ class _KosListViewState extends State<KosListView> {
               child: Row(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                     child: Image.asset(
                       'assets/images/kos_building.jpg',
                       width: 80,
@@ -180,7 +187,7 @@ class _KosListViewState extends State<KosListView> {
                         width: 80,
                         height: 80,
                         color: KosmoTheme.primary.withValues(alpha: 0.1),
-                        child: const Icon(Icons.home_work, color: KosmoTheme.primary, size: 40),
+                        child: Icon(Icons.home_work, color: primaryAccent, size: 40),
                       ),
                     ),
                   ),
@@ -193,32 +200,40 @@ class _KosListViewState extends State<KosListView> {
                           kos.name,
                           style: const TextStyle(
                             fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           kos.address,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 12,
-                            color: KosmoTheme.textSecondary,
+                            color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          '${kos.totalRooms} Kamar',
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: KosmoTheme.primary,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: KosmoTheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${kos.totalRooms} Kamar',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: primaryAccent,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  const Icon(Icons.chevron_right, color: KosmoTheme.textSecondary),
                 ],
               ),
             ),
