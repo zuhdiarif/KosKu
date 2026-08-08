@@ -11,26 +11,29 @@ class KosmoDialog {
     String cancelLabel = 'Batal',
     bool isDangerous = false,
   }) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final result = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: [
               Icon(
                 isDangerous ? Icons.warning_amber_rounded : Icons.help_outline_rounded,
-                color: isDangerous ? KosmoTheme.error : KosmoTheme.primary,
+                color: isDangerous ? KosmoTheme.error : (isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary),
                 size: 28,
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
               ),
@@ -38,10 +41,10 @@ class KosmoDialog {
           ),
           content: Text(
             message,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
-              color: KosmoTheme.textSecondary,
+              color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
             ),
           ),
           actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -50,7 +53,10 @@ class KosmoDialog {
               onPressed: () => Navigator.pop(context, false),
               child: Text(
                 cancelLabel,
-                style: const TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary),
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
+                ),
               ),
             ),
             ElevatedButton(
@@ -81,14 +87,15 @@ class KosmoDialog {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.error_outline_rounded, color: KosmoTheme.error, size: 28),
-              SizedBox(width: 10),
+              const Icon(Icons.error_outline_rounded, color: KosmoTheme.error, size: 28),
+              const SizedBox(width: 10),
               Text(
-                'Perhatian',
-                style: TextStyle(
+                title,
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -99,10 +106,10 @@ class KosmoDialog {
           ),
           content: Text(
             message,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
-              color: KosmoTheme.textPrimary,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
           actions: [

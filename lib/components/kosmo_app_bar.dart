@@ -4,12 +4,14 @@ class KosmoAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
   final bool showBack;
+  final Widget? leading;
 
   const KosmoAppBar({
     super.key,
     required this.title,
     this.actions,
     this.showBack = true,
+    this.leading,
   });
 
   @override
@@ -17,9 +19,19 @@ class KosmoAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(
         title,
-        style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+          color: Theme.of(context).appBarTheme.foregroundColor,
+        ),
       ),
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
       automaticallyImplyLeading: showBack,
+      leading: leading,
+      centerTitle: false,
       actions: actions,
     );
   }

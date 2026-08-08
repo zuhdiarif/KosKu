@@ -24,11 +24,11 @@ class KosmoButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: 52,
-      child: _buildButton(),
+      child: _buildButton(context),
     );
   }
 
-  Widget _buildButton() {
+  Widget _buildButton(BuildContext context) {
     switch (variant) {
       case KosmoButtonVariant.primary:
         return ElevatedButton(
@@ -36,8 +36,9 @@ class KosmoButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: KosmoTheme.primary,
             foregroundColor: Colors.white,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
           child: _buildChild(Colors.white),
@@ -48,22 +49,27 @@ class KosmoButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: KosmoTheme.secondary,
             foregroundColor: Colors.white,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
           child: _buildChild(Colors.white),
         );
       case KosmoButtonVariant.outline:
+        final primaryColor = Theme.of(context).brightness == Brightness.dark
+            ? KosmoTheme.onPrimaryContainer
+            : KosmoTheme.primary;
         return OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: KosmoTheme.primary),
+            foregroundColor: primaryColor,
+            side: BorderSide(color: primaryColor, width: 1.5),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
             ),
           ),
-          child: _buildChild(KosmoTheme.primary),
+          child: _buildChild(primaryColor),
         );
     }
   }
@@ -71,8 +77,8 @@ class KosmoButton extends StatelessWidget {
   Widget _buildChild(Color color) {
     if (isLoading) {
       return SizedBox(
-        height: 24,
-        width: 24,
+        height: 22,
+        width: 22,
         child: CircularProgressIndicator(
           strokeWidth: 2.5,
           color: color,
@@ -85,10 +91,24 @@ class KosmoButton extends StatelessWidget {
         children: [
           Icon(icon, size: 20),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 16)),
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+          ),
         ],
       );
     }
-    return Text(label, style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 16));
+    return Text(
+      label,
+      style: const TextStyle(
+        fontFamily: 'Poppins',
+        fontWeight: FontWeight.w600,
+        fontSize: 15,
+      ),
+    );
   }
 }

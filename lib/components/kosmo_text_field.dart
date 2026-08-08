@@ -11,6 +11,7 @@ class KosmoTextField extends StatefulWidget {
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
   final int maxLines;
+  final ValueChanged<String>? onChanged;
 
   const KosmoTextField({
     super.key,
@@ -23,6 +24,7 @@ class KosmoTextField extends StatefulWidget {
     this.suffixIcon,
     this.keyboardType,
     this.maxLines = 1,
+    this.onChanged,
   });
 
   @override
@@ -40,12 +42,14 @@ class _KosmoTextFieldState extends State<KosmoTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Widget? suffix = widget.suffixIcon;
+
     if (widget.isPassword) {
       suffix = IconButton(
         icon: Icon(
           _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-          color: KosmoTheme.textSecondary,
+          color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
         ),
         onPressed: () {
           setState(() {
@@ -61,12 +65,48 @@ class _KosmoTextFieldState extends State<KosmoTextField> {
       obscureText: _obscure,
       keyboardType: widget.keyboardType,
       maxLines: widget.isPassword ? 1 : widget.maxLines,
-      style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
+      onChanged: widget.onChanged,
+      style: TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: 14,
+        color: Theme.of(context).textTheme.bodyLarge?.color,
+      ),
       decoration: InputDecoration(
         labelText: widget.label,
-        labelStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
-        prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+        labelStyle: TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 14,
+          color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
+        ),
+        prefixIcon: widget.prefixIcon != null
+            ? Icon(
+                widget.prefixIcon,
+                color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
+              )
+            : null,
         suffixIcon: suffix,
+        filled: true,
+        fillColor: isDark ? KosmoTheme.darkSurface : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF333333) : const Color(0xFFE1E3E4),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF333333) : const Color(0xFFE1E3E4),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary,
+            width: 2,
+          ),
+        ),
       ),
     );
   }
