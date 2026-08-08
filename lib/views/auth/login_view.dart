@@ -39,7 +39,7 @@ class _LoginViewState extends State<LoginView> {
         KosmoDialog.showError(
           context: context,
           title: 'Gagal Login',
-          message: 'Email atau password salah. Silakan periksa kembali data Anda.',
+          message: err.isNotEmpty ? err : 'Email atau password salah. Silakan periksa kembali data Anda.',
         );
       }
     }
@@ -47,110 +47,163 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Login Kosmo')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    height: 80,
-                    width: 80,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.apartment_rounded, color: KosmoTheme.primary, size: 64),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Selamat Datang Kembali',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Masuk ke akun owner kosmo Anda',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  color: KosmoTheme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              KosmoTextField(
-                controller: _emailController,
-                label: 'Email',
-                keyboardType: TextInputType.emailAddress,
-                prefixIcon: Icons.email_outlined,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Email tidak boleh kosong';
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
-                    return 'Format email tidak valid';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              KosmoTextField(
-                controller: _passwordController,
-                label: 'Password',
-                isPassword: true,
-                prefixIcon: Icons.lock_outline,
-                validator: (val) {
-                  if (val == null || val.isEmpty) return 'Password tidak boleh kosong';
-                  if (val.length < 6) return 'Password minimal 6 karakter';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
-                  child: const Text(
-                    'Lupa Password?',
-                    style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.primary, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Consumer<AuthProvider>(
-                builder: (context, auth, _) => auth.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : KosmoButton(
-                        label: 'Login',
-                        onPressed: _login,
-                      ),
-              ),
-              const SizedBox(height: 16),
-              Row(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('Belum punya akun? ', style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.textSecondary)),
-                  GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, AppRoutes.register),
-                    child: const Text(
-                      'Daftar Sekarang',
-                      style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.primary, fontWeight: FontWeight.bold),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: KosmoTheme.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          height: 72,
+                          width: 72,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Icon(
+                            Icons.apartment_rounded,
+                            color: primaryAccent,
+                            size: 64,
+                          ),
+                        ),
+                      ),
                     ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Selamat Datang Kembali',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Masuk ke akun manajemen Kosmo Anda',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        KosmoTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          keyboardType: TextInputType.emailAddress,
+                          prefixIcon: Icons.email_outlined,
+                          validator: (val) {
+                            if (val == null || val.trim().isEmpty) return 'Email tidak boleh kosong';
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
+                              return 'Format email tidak valid';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        KosmoTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          isPassword: true,
+                          prefixIcon: Icons.lock_outline,
+                          validator: (val) {
+                            if (val == null || val.isEmpty) return 'Password tidak boleh kosong';
+                            if (val.length < 6) return 'Password minimal 6 karakter';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
+                            child: Text(
+                              'Lupa Password?',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                color: primaryAccent,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Consumer<AuthProvider>(
+                          builder: (context, auth, _) => auth.isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : KosmoButton(
+                                  label: 'Login',
+                                  onPressed: _login,
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Belum punya akun? ',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(context, AppRoutes.register),
+                        child: Text(
+                          'Daftar Sekarang',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            color: primaryAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),

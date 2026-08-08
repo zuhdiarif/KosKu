@@ -39,6 +39,9 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
+
     return Scaffold(
       appBar: const KosmoAppBar(title: 'Lupa Password'),
       body: SingleChildScrollView(
@@ -49,54 +52,83 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
-              const Icon(
-                Icons.lock_reset_rounded,
-                size: 80,
-                color: KosmoTheme.primary,
+              const SizedBox(height: 12),
+              Center(
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundColor: KosmoTheme.primary.withValues(alpha: 0.1),
+                  child: Icon(
+                    Icons.lock_reset_rounded,
+                    size: 44,
+                    color: primaryAccent,
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Reset Password Akun',
                 style: TextStyle(
                   fontFamily: 'Poppins',
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Masukkan alamat email terdaftar Anda. Kami akan mengirimkan tautan untuk mengatur ulang password.',
+              Text(
+                'Masukkan email terdaftar Anda. Kami akan mengirimkan instruksi untuk me-reset password.',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
-                  color: KosmoTheme.textSecondary,
+                  color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
-              KosmoTextField(
-                controller: _emailController,
-                label: 'Email Terdaftar',
-                keyboardType: TextInputType.emailAddress,
-                prefixIcon: Icons.email_outlined,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Email tidak boleh kosong';
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
-                    return 'Format email tidak valid';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-              Consumer<AuthProvider>(
-                builder: (context, auth, _) => auth.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : KosmoButton(
-                        label: 'Kirim Link Reset',
-                        onPressed: _resetPassword,
-                      ),
+              const SizedBox(height: 28),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    KosmoTextField(
+                      controller: _emailController,
+                      label: 'Email Terdaftar',
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: Icons.email_outlined,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Email tidak boleh kosong';
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
+                          return 'Format email tidak valid';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    Consumer<AuthProvider>(
+                      builder: (context, auth, _) => auth.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : KosmoButton(
+                              label: 'Kirim Link Reset',
+                              onPressed: _resetPassword,
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

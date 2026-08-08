@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:kosmo/theme/kosmo_theme.dart';
 import 'package:kosmo/utils/routes.dart';
 import 'package:kosmo/providers/auth_provider.dart';
+import 'package:kosmo/components/kosmo_app_bar.dart';
 import 'package:kosmo/components/kosmo_text_field.dart';
 import 'package:kosmo/components/kosmo_button.dart';
 import 'package:kosmo/components/kosmo_dialog.dart';
@@ -49,8 +50,10 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Daftar Akun Kosmo')),
+      appBar: const KosmoAppBar(title: 'Daftar Akun Kosmo'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
@@ -59,82 +62,104 @@ class _RegisterViewState extends State<RegisterView> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Buat Akun Owner Baru',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 4),
-              const Text(
-                'Kelola kos-kosan Anda secara mudah & efisien',
+              const SizedBox(height: 6),
+              Text(
+                'Kelola kos-kosan Anda secara efisien & modern',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
-                  color: KosmoTheme.textSecondary,
+                  color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
-              KosmoTextField(
-                controller: _nameController,
-                label: 'Nama Lengkap',
-                prefixIcon: Icons.person_outline,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Nama lengkap tidak boleh kosong';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              KosmoTextField(
-                controller: _emailController,
-                label: 'Email',
-                keyboardType: TextInputType.emailAddress,
-                prefixIcon: Icons.email_outlined,
-                validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Email tidak boleh kosong';
-                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
-                    return 'Format email tidak valid';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              KosmoTextField(
-                controller: _passwordController,
-                label: 'Password',
-                isPassword: true,
-                prefixIcon: Icons.lock_outline,
-                validator: (val) {
-                  if (val == null || val.isEmpty) return 'Password tidak boleh kosong';
-                  if (val.length < 6) return 'Password minimal 6 karakter';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              KosmoTextField(
-                controller: _confirmPasswordController,
-                label: 'Konfirmasi Password',
-                isPassword: true,
-                prefixIcon: Icons.lock_clock_outlined,
-                validator: (val) {
-                  if (val == null || val.isEmpty) return 'Konfirmasi password tidak boleh kosong';
-                  if (val != _passwordController.text) return 'Password tidak cocok';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 28),
-              Consumer<AuthProvider>(
-                builder: (context, auth, _) => auth.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : KosmoButton(
-                        label: 'Daftar & Minta Kode Verifikasi',
-                        onPressed: _register,
-                      ),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    KosmoTextField(
+                      controller: _nameController,
+                      label: 'Nama Lengkap',
+                      prefixIcon: Icons.person_outline,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Nama lengkap tidak boleh kosong';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    KosmoTextField(
+                      controller: _emailController,
+                      label: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: Icons.email_outlined,
+                      validator: (val) {
+                        if (val == null || val.trim().isEmpty) return 'Email tidak boleh kosong';
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val.trim())) {
+                          return 'Format email tidak valid';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    KosmoTextField(
+                      controller: _passwordController,
+                      label: 'Password',
+                      isPassword: true,
+                      prefixIcon: Icons.lock_outline,
+                      validator: (val) {
+                        if (val == null || val.isEmpty) return 'Password tidak boleh kosong';
+                        if (val.length < 6) return 'Password minimal 6 karakter';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    KosmoTextField(
+                      controller: _confirmPasswordController,
+                      label: 'Konfirmasi Password',
+                      isPassword: true,
+                      prefixIcon: Icons.lock_clock_outlined,
+                      validator: (val) {
+                        if (val == null || val.isEmpty) return 'Konfirmasi password tidak boleh kosong';
+                        if (val != _passwordController.text) return 'Password tidak cocok';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    Consumer<AuthProvider>(
+                      builder: (context, auth, _) => auth.isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : KosmoButton(
+                              label: 'Daftar & Minta Kode Verifikasi',
+                              onPressed: _register,
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

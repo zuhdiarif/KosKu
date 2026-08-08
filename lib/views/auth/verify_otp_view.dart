@@ -58,6 +58,9 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? KosmoTheme.onPrimaryContainer : KosmoTheme.primary;
+
     return Scaffold(
       appBar: const KosmoAppBar(title: 'Verifikasi Email'),
       body: SingleChildScrollView(
@@ -66,19 +69,26 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20),
-            const Icon(
-              Icons.mark_email_read_rounded,
-              size: 80,
-              color: KosmoTheme.primary,
+            const SizedBox(height: 12),
+            Center(
+              child: CircleAvatar(
+                radius: 40,
+                backgroundColor: KosmoTheme.primary.withValues(alpha: 0.1),
+                child: Icon(
+                  Icons.mark_email_read_rounded,
+                  size: 44,
+                  color: primaryAccent,
+                ),
+              ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Masukkan Nomor Verifikasi',
+            Text(
+              'Masukkan Kode Verifikasi',
               style: TextStyle(
                 fontFamily: 'Poppins',
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
               textAlign: TextAlign.center,
             ),
@@ -88,42 +98,67 @@ class _VerifyOtpViewState extends State<VerifyOtpView> {
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
-                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
-            KosmoTextField(
-              controller: _otpController,
-              label: 'Kode Verifikasi (OTP)',
-              keyboardType: TextInputType.number,
-              prefixIcon: Icons.lock_outline,
-            ),
-            const SizedBox(height: 24),
-            Consumer<AuthProvider>(
-              builder: (context, auth, _) => auth.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : KosmoButton(
-                      label: 'Verifikasi & Login',
-                      onPressed: _verify,
-                    ),
-            ),
-            const SizedBox(height: 12),
-            TextButton(
-              onPressed: _resend,
-              child: const Text(
-                'Kirim Ulang Kode OTP',
-                style: TextStyle(fontFamily: 'Poppins', color: KosmoTheme.primary, fontWeight: FontWeight.w600),
+            const SizedBox(height: 28),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF333333) : const Color(0xFFE8ECE9),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  KosmoTextField(
+                    controller: _otpController,
+                    label: 'Kode Verifikasi (OTP)',
+                    keyboardType: TextInputType.number,
+                    prefixIcon: Icons.lock_outline,
+                  ),
+                  const SizedBox(height: 20),
+                  Consumer<AuthProvider>(
+                    builder: (context, auth, _) => auth.isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : KosmoButton(
+                            label: 'Verifikasi & Login',
+                            onPressed: _verify,
+                          ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _resend,
+              child: Text(
+                'Kirim Ulang Kode OTP',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  color: primaryAccent,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'Kembali ke Pendaftaran',
                 style: TextStyle(
                   fontFamily: 'Poppins',
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.6),
+                  color: isDark ? KosmoTheme.darkTextSecondary : KosmoTheme.textSecondary,
                 ),
               ),
             ),
